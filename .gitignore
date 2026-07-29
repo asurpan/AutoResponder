@@ -18,6 +18,10 @@
 !fr/
 !fr/*
 
+# Permitir assets de la web
+!github_assets/
+!github_assets/*
+
 # Permitir archivos de verificación en cualquier carpeta
 !google*.html
 !politica.html
