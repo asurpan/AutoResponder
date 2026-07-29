@@ -18,12 +18,16 @@
 <p>En <strong>AutoResponder Pro</strong>, la privacidad de nuestros usuarios es nuestra prioridad número uno. Esta aplicación ha sido diseñada bajo el principio de "Privacidad por Diseño".</p>
 
 <h2>1. Recopilación de Datos</h2>
-<p>Nuestra aplicación <strong>NO recopila, NO almacena y NO transmite</strong> ningún dato personal fuera de su dispositivo móvil. Toda la información (historial de chats, nombres de contactos y números de teléfono) se procesa localmente en su terminal.</p>
+<p>Nuestra aplicación procesa la mayoría de la información localmente en su terminal. Sin embargo, para garantizar la integridad del sistema de créditos gratuitos, utilizamos el identificador único de su dispositivo (<strong>ANDROID_ID</strong>). Este identificador se transmite y almacena de forma segura en <strong>Firebase Realtime Database</strong> (un servicio de Google) únicamente para llevar el conteo de los 30 mensajes de prueba y evitar el fraude por reinstalación.</p>
+<p><strong>NO recopilamos ni transmitimos:</strong> nombres de contactos, contenido de sus mensajes personales o cualquier otra información privada de sus conversaciones.</p>
 
 <h2>2. Responsabilidad Legal del Usuario</h2>
-<p>Al utilizar esta herramienta, el usuario reconoce ser el <strong>único responsable</strong> del tratamiento de los datos personales de terceros de acuerdo con la legislación vigente en su país (RGPD u otras). AutoResponder Pro no actúa como encargado del tratamiento, ya que no tiene acceso técnico a los datos almacenados localmente en el terminal del usuario.</p>
+<p>Al utilizar esta herramienta, el usuario reconoce ser el <strong>único responsable</strong> del tratamiento de los datos personales de terceros de acuerdo con la legislación vigente en su país (RGPD u otras). AutoResponder Pro no actúa como encargado del tratamiento del contenido de sus mensajes, ya que no tiene acceso técnico a los mismos.</p>
 
-<h2>3. Permisos de Android</h2>
+<h2>3. Servicios de Terceros</h2>
+<p>Utilizamos <strong>Firebase</strong> (Google Cloud) exclusivamente para la gestión técnica del contador de uso y la verificación de licencias. Estos datos están protegidos bajo los estándares de seguridad de Google.</p>
+
+<h2>4. Permisos de Android</h2>
 <ul>
     <li><strong>Acceso a Notificaciones:</strong> Necesario exclusivamente para leer los mensajes de WhatsApp y poder responder automáticamente.</li>
     <li><strong>Contactos:</strong> Se utiliza únicamente para identificar el número de teléfono de los clientes que ya están guardados en su agenda.</li>
