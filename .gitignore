@@ -5,6 +5,7 @@
 !index.html
 !app-release.apk
 !.gitignore
+!LICENSE.md
 
 # Permitir carpetas de idiomas y su contenido
 !es/
