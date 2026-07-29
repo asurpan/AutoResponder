@@ -1,0 +1,8 @@
+com.sagon.legendario.app-pngs-0 C:\Users\Jose\AndroidStudioProjects\legendario\app\build\generated\res\pngs\release
+com.sagon.legendario.app-updated_navigation_xml-1 C:\Users\Jose\AndroidStudioProjects\legendario\app\build\generated\updated_navigation_xml\release
+com.sagon.legendario.app-packageReleaseResources-2 C:\Users\Jose\AndroidStudioProjects\legendario\app\build\intermediates\incremental\release\packageReleaseResources\merged.dir
+com.sagon.legendario.app-packageReleaseResources-3 C:\Users\Jose\AndroidStudioProjects\legendario\app\build\intermediates\incremental\release\packageReleaseResources\stripped.dir
+com.sagon.legendario.app-release-4 C:\Users\Jose\AndroidStudioProjects\legendario\app\build\intermediates\merged_res\release\mergeReleaseResources
+com.sagon.legendario.app-main-5 C:\Users\Jose\AndroidStudioProjects\legendario\app\src\main\res
+com.sagon.legendario.app-release-6 C:\Users\Jose\AndroidStudioProjects\legendario\app\src\release\res
+gradleHome-0 C:\Users\Jose\.gradle

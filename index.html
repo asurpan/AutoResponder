@@ -1,1 +1,25 @@
-
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    <script>
+        var userLang = navigator.language || navigator.userLanguage;
+        if (userLang.startsWith('zh')) {
+            window.location.href = "zh/index.html";
+        } else if (userLang.startsWith('fr')) {
+            window.location.href = "fr/index.html";
+        } else if (userLang.startsWith('pt')) {
+            window.location.href = "pt/index.html";
+        } else if (userLang.startsWith('en')) {
+            window.location.href = "en/index.html";
+        } else {
+            // Default to Spanish
+            window.location.href = "es/index.html";
+        }
+    </script>
+</head>
+<body>
+    <p>Redirecting to your language... If not redirected, <a href="es/index.html">click here</a>.</p>
+</body>
+</html>
