@@ -2,21 +2,24 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Redirecting...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoResponder Pro - Smart WhatsApp Lead Generator</title>
+    <meta name="description" content="The ultimate WhatsApp automation tool for professionals. Capture leads, filter customers, and increase your sales while you work. Available in ES, EN, FR, PT, ZH.">
+    <link rel="canonical" href="https://asurpan.github.io/AutoResponder/" />
+    <link rel="alternate" hreflang="es" href="https://asurpan.github.io/AutoResponder/es/index.html" />
+    <link rel="alternate" hreflang="en" href="https://asurpan.github.io/AutoResponder/en/index.html" />
+    <link rel="alternate" hreflang="fr" href="https://asurpan.github.io/AutoResponder/fr/index.html" />
+    <link rel="alternate" hreflang="pt" href="https://asurpan.github.io/AutoResponder/pt/index.html" />
+    <link rel="alternate" hreflang="zh" href="https://asurpan.github.io/AutoResponder/zh/index.html" />
+    <link rel="alternate" hreflang="x-default" href="https://asurpan.github.io/AutoResponder/es/index.html" />
     <script>
         var userLang = navigator.language || navigator.userLanguage;
-        if (userLang.startsWith('zh')) {
-            window.location.href = "zh/index.html";
-        } else if (userLang.startsWith('fr')) {
-            window.location.href = "fr/index.html";
-        } else if (userLang.startsWith('pt')) {
-            window.location.href = "pt/index.html";
-        } else if (userLang.startsWith('en')) {
-            window.location.href = "en/index.html";
-        } else {
-            // Default to Spanish
-            window.location.href = "es/index.html";
-        }
+        var path = "es/index.html";
+        if (userLang.startsWith('zh')) path = "zh/index.html";
+        else if (userLang.startsWith('fr')) path = "fr/index.html";
+        else if (userLang.startsWith('pt')) path = "pt/index.html";
+        else if (userLang.startsWith('en')) path = "en/index.html";
+        window.location.replace(path);
     </script>
 </head>
 <body>
