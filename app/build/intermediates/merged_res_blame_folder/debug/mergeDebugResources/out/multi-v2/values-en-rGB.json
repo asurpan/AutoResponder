@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.sagon.legendario.app-mergeDebugResources-36:/values-en-rGB/values-en-rGB.xml",
+            "outputFile": "com.sagon.legendario.app-mergeDebugResources-38:/values-en-rGB/values-en-rGB.xml",
             "map": [
                 {
                     "source": "C:\\Users\\Jose\\.gradle\\caches\\9.5.0\\transforms\\64441f8bd8aad5250f799458b344855b\\transformed\\core-1.19.0\\res\\values-en-rGB\\values-en-rGB.xml",

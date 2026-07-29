@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.sagon.legendario.app-mergeDebugResources-36:/values-fr-rCA/values-fr-rCA.xml",
+            "outputFile": "com.sagon.legendario.app-mergeDebugResources-38:/values-fr-rCA/values-fr-rCA.xml",
             "map": [
                 {
                     "source": "C:\\Users\\Jose\\.gradle\\caches\\9.5.0\\transforms\\bc8e6a6f4005ccd7d237f0c9f514b3bc\\transformed\\ui\\res\\values-fr-rCA\\values-fr-rCA.xml",

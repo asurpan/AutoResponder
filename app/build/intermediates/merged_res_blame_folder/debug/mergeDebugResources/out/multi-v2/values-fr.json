@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.sagon.legendario.app-mergeDebugResources-36:/values-fr/values-fr.xml",
+            "outputFile": "com.sagon.legendario.app-mergeDebugResources-38:/values-fr/values-fr.xml",
             "map": [
                 {
                     "source": "C:\\Users\\Jose\\.gradle\\caches\\9.5.0\\transforms\\bd45218e7e80a31382d8d33649fe5592\\transformed\\material\\res\\values-fr\\values-fr.xml",

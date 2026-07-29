@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.sagon.legendario.app-mergeDebugResources-36:/values/values.xml",
+            "outputFile": "com.sagon.legendario.app-mergeDebugResources-38:/values/values.xml",
             "map": [
                 {
                     "source": "C:\\Users\\Jose\\.gradle\\caches\\9.5.0\\transforms\\4bb56c9e41d1376e845e6f26ad2b5e6e\\transformed\\material3\\res\\values\\values.xml",
@@ -44,9 +44,9 @@
                     "from": {
                         "startLines": "7,2,3,4,5,6,8",
                         "startColumns": "4,4,4,4,4,4,4",
-                        "startOffsets": "286,55,102,149,196,241,328",
+                        "startOffsets": "293,57,105,153,201,247,336",
                         "endColumns": "41,46,46,46,44,44,41",
-                        "endOffsets": "323,97,144,191,236,281,365"
+                        "endOffsets": "330,99,147,195,241,287,373"
                     },
                     "to": {
                         "startLines": "77,82,83,84,85,86,87",
@@ -78,9 +78,9 @@
                     "from": {
                         "startLines": "1",
                         "startColumns": "4",
-                        "startOffsets": "16",
+                        "startOffsets": "17",
                         "endColumns": "47",
-                        "endOffsets": "59"
+                        "endOffsets": "60"
                     },
                     "to": {
                         "startLines": "202",
@@ -288,9 +288,9 @@
                     "from": {
                         "startLines": "3",
                         "startColumns": "4",
-                        "startOffsets": "56",
+                        "startOffsets": "59",
                         "endColumns": "87",
-                        "endOffsets": "139"
+                        "endOffsets": "142"
                     },
                     "to": {
                         "startLines": "329",

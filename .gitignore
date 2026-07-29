@@ -1,15 +1,23 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+# Ignorar todo por defecto
+*
+
+# Permitir archivos de la web y el instalador
+!index.html
+!app-release.apk
+!.gitignore
+
+# Permitir carpetas de idiomas y su contenido
+!es/
+!es/*
+!en/
+!en/*
+!pt/
+!pt/*
+!zh/
+!zh/*
+!fr/
+!fr/*
+
+# Permitir archivos de verificación en cualquier carpeta
+!google*.html
+!politica.html
