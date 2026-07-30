@@ -619,24 +619,59 @@ fun MainScreen(activity: MainActivity) {
 
                         HorizontalDivider(color = GlassWhite)
 
-                        // SECCIÓN 3: RESET MAESTRO (OPCIONAL)
-                        Button(
-                            onClick = {
-                                val b = Base64.DEFAULT
-                                val k = String(Base64.decode("cHVsaXIsIHN1ZWxvLCBicmlsbG8sIHB1bGlkb3IsIHRlcnJhem8sIG1hcm1vbCwgZXNjYWxlcmEsIHByZXN1cHVlc3RvLCBjdWFudG8sIHByZWNpbywgY2VyYSwgcmVwYXNhciwgc2Fsb24=", b))
-                                val n = String(Base64.decode("Njc3MzE5Mzkz", b))
-                                val d = String(Base64.decode("wqFCdWVuYXMhIFNveSBKb3NlIGVsIHB1bGlkb3IuIEFob3JhIG1pc21vIGVzdG95IGxpYWRvIGNvbiBsYSBtw6FxdWluYSB5IG5vIHB1ZWRvIGF0ZW5kZXJ0ZSBiaWVuIHBvciBhcXXDrS4gRXNjcsOtYmVtZSBwb3JmYSBhIG1pIG7Dum1lcm8gcGVyc29uYWwge251bWVyb30geSBkaW1lIHF1ZSBxdWllcmVzIGVsIERFU0NVRU5UTyBERUwgTUVTLiBBc8OtIHRlIHBhc28gdW4gcHJlc3VwdWVzdG8gYnVlbm8geSBlY29uw7NtaWNvIHLDoXBpZG8uIMKhRW4gY3VhbnRvIHBhcmUgdW4gc2VndW5kbyB0ZSBlc2NyaWJvIQ==", b))
-                                val g = String(Base64.decode("wqFCdWVuYXMhIFNveSBKb3NlIGVsIHB1bGlkb3IuIFlhIGhlIHRlcm1pbmFkbyBwb3IgaG95IHkgZXN0b3kgZGVzY2Fuc2FuZG8uIFBhcmEgZGVqYXJ0ZSBlbCBwcmVzdXB1ZXN0byBsaXN0byBwYXJhIG1hw7FhbmEgYSBwcmltZXJhIGhvcmEsIGVzY3LDrWJlbWUgcG9yZmEgYSBtaSBuw7ptZXJvIHBlcnNvbmFsIHtudW1lcm99IG1lbmNpb25hbmRvIGVsIERFU0NVRU5UTyBERUwgTUVTLiDCoU1hw7FhbmEgYSBwcmltZXJhIGhvcmEgdGUgcGFzbyBlbCBwcmVjaW8gY29uIGxhIG9mZXJ0YSBhcGxpY2FkYSBzaW4gZmFsdGEhIMKhR3JhY2lhcyE=", b))
-                                
-                                keywords = k; techNumber = n; msgDay = d; msgNight = g
-                                prefs.edit().putString("keywords", k).putString("tech_number", n).putString("msg_day", d).putString("msg_night", g).apply()
-                                Toast.makeText(context, "Configuración del Pulidor Restaurada", Toast.LENGTH_SHORT).show()
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1f), contentColor = Color.White),
-                            border = BorderStroke(1.dp, GlassWhite)
-                        ) {
-                            Text("RESTAURAR TEXTOS PULIDOR", fontSize = 11.sp)
+                        // SECCIÓN 3: GESTIÓN DE PLANTILLAS
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("GESTIÓN DE PLANTILLAS", color = TurquoiseNeon, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            
+                            Button(
+                                onClick = {
+                                    prefs.edit()
+                                        .putString("tpl_keywords", keywords)
+                                        .putString("tpl_tech_number", techNumber)
+                                        .putString("tpl_msg_day", msgDay)
+                                        .putString("tpl_msg_night", msgNight)
+                                        .apply()
+                                    Toast.makeText(context, "✅ Configuración actual grabada", Toast.LENGTH_SHORT).show()
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = MintElectric.copy(alpha = 0.2f), contentColor = MintElectric),
+                                border = BorderStroke(1.dp, MintElectric.copy(alpha = 0.4f))
+                            ) {
+                                Text("GUARDAR COMO MI PLANTILLA", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+
+                            Button(
+                                onClick = {
+                                    val tplK = prefs.getString("tpl_keywords", null)
+                                    if (tplK != null) {
+                                        // Cargar plantilla guardada por el usuario
+                                        val k = tplK
+                                        val n = prefs.getString("tpl_tech_number", "") ?: ""
+                                        val d = prefs.getString("tpl_msg_day", "") ?: ""
+                                        val g = prefs.getString("tpl_msg_night", "") ?: ""
+                                        
+                                        keywords = k; techNumber = n; msgDay = d; msgNight = g
+                                        prefs.edit().putString("keywords", k).putString("tech_number", n).putString("msg_day", d).putString("msg_night", g).apply()
+                                        Toast.makeText(context, "✅ Tu plantilla ha sido cargada", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        // Cargar textos originales si no hay plantilla
+                                        val b = Base64.DEFAULT
+                                        val k = String(Base64.decode("cHVsaXIsIHN1ZWxvLCBicmlsbG8sIHB1bGlkb3IsIHRlcnJhem8sIG1hcm1vbCwgZXNjYWxlcmEsIHByZXN1cHVlc3RvLCBjdWFudG8sIHByZWNpbywgY2VyYSwgcmVwYXNhciwgc2Fsb24=", b))
+                                        val n = String(Base64.decode("Njc3MzE5Mzkz", b))
+                                        val d = String(Base64.decode("wqFCdWVuYXMhIFNveSBKb3NlIGVsIHB1bGlkb3IuIEFob3JhIG1pc21vIGVzdG95IGxpYWRvIGNvbiBsYSBtw6FxdWluYSB5IG5vIHB1ZWRvIGF0ZW5kZXJ0ZSBiaWVuIHBvciBhcXXDrS4gRXNjcsOtYmVtZSBwb3JmYSBhIG1pIG7Dum1lcm8gcGVyc29uYWwge251bWVyb30geSBkaW1lIHF1ZSBxdWllcmVzIGVsIERFU0NVRU5UTyBERUwgTUVTLiBBc8OtIHRlIHBhc28gdW4gcHJlc3VwdWVzdG8gYnVlbm8geSBlY29uw7NtaWNvIHLDoXBpZG8uIMKhRW4gY3VhbnRvIHBhcmUgdW4gc2VndW5kbyB0ZSBlc2NyaWJvIQ==", b))
+                                        val g = String(Base64.decode("wqFCdWVuYXMhIFNveSBKb3NlIGVsIHB1bGlkb3IuIFlhIGhlIHRlcm1pbmFkbyBwb3IgaG95IHkgZXN0b3kgZGVzY2Fuc2FuZG8uIFBhcmEgZGVqYXJ0ZSBlbCBwcmVzdXB1ZXN0byBsaXN0byBwYXJhIG1hw7FhbmEgYSBwcmltZXJhIGhvcmEsIGVzY3LDrWJlbWUgcG9yZmEgYSBtaSBuw7ptZXJvIHBlcnNvbmFsIHtudW1lcm99IG1lbmNpb25hbmRvIGVsIERFU0NVRU5UTyBERUwgTUVTLiDCoU1hw7FhbmEgYSBwcmltZXJhIGhvcmEgdGUgcGFzbyBlbCBwcmVjaW8gY29uIGxhIG9mZXJ0YSBhcGxpY2FkYSBzaW4gZmFsdGEhIMKhR3JhY2lhcyE=", b))
+                                        
+                                        keywords = k; techNumber = n; msgDay = d; msgNight = g
+                                        prefs.edit().putString("keywords", k).putString("tech_number", n).putString("msg_day", d).putString("msg_night", g).apply()
+                                        Toast.makeText(context, "Configuración del Pulidor Restaurada", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1f), contentColor = Color.White),
+                                border = BorderStroke(1.dp, GlassWhite)
+                            ) {
+                                Text("CARGAR MI PLANTILLA", fontSize = 11.sp)
+                            }
                         }
                     }
                 }
