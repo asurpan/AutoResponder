@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -56,6 +57,7 @@ import android.media.SoundPool
 import android.content.ClipboardManager
 import android.content.ClipData
 import java.security.MessageDigest
+import android.media.ToneGenerator
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.activity.compose.BackHandler
@@ -94,6 +96,22 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ -> }
 
+    private var onContactPickedCallback: ((String) -> Unit)? = null
+
+    private val pickContactLauncher = registerForActivityResult(
+        ActivityResultContracts.PickContact()
+    ) { uri ->
+        uri?.let { contactUri ->
+            val projection = arrayOf(android.provider.ContactsContract.Contacts.DISPLAY_NAME)
+            contentResolver.query(contactUri, projection, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val name = cursor.getString(0)
+                    onContactPickedCallback?.invoke(name)
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -122,6 +140,32 @@ class MainActivity : ComponentActivity() {
         requestPermissionLauncher.launch(arrayOf(android.Manifest.permission.READ_CONTACTS))
     }
 
+    fun pickContact(onPicked: (String) -> Unit) {
+        onContactPickedCallback = onPicked
+        pickContactLauncher.launch(null)
+    }
+
+    fun playActivationSound() {
+        try {
+            val tg = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
+            tg.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+            
+            // Usamos un hilo para el segundo pitido para no bloquear la UI
+            Thread {
+                try {
+                    Thread.sleep(300)
+                    tg.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+                    Thread.sleep(500)
+                    tg.release()
+                } catch (e: Exception) {
+                    try { tg.release() } catch (ignored: Exception) {}
+                }
+            }.start()
+        } catch (e: Exception) {
+            android.util.Log.e("AutoResponder", "Error en sonido: ${e.message}")
+        }
+    }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Test Channel"
@@ -129,6 +173,8 @@ class MainActivity : ComponentActivity() {
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
+                setSound(null, null) // Silenciar el canal de prueba para oír solo al robot
+                enableVibration(false)
             }
             val notificationManager: NotificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -265,6 +311,7 @@ fun MainScreen(activity: MainActivity) {
     var history by remember { mutableStateOf(prefs.getString("leads_history", "") ?: "") }
     var logs by remember { mutableStateOf(prefs.getString("activity_logs", "") ?: "") }
     var isRobotEnabled by remember { mutableStateOf(prefs.getBoolean("service_enabled", false)) }
+    var isSoundEnabled by remember { mutableStateOf(prefs.getBoolean("sound_enabled", true)) }
 
     // --- NUEVOS ESTADOS DE CONFIGURACIÓN ---
     val defaultKeywords = "presupuesto, averia, reparacion, urgente, mantenimiento, cuanto, precio, servicio, instalacion, arreglar"
@@ -274,12 +321,19 @@ fun MainScreen(activity: MainActivity) {
         mutableStateOf(if (cleaned.endsWith(",")) cleaned.dropLast(1) else cleaned)
     }
     var techNumber by remember { mutableStateOf(prefs.getString("tech_number", "600000000") ?: "600000000") }
+    var blacklist by remember { mutableStateOf(prefs.getString("blacklist", "") ?: "") }
+    var promoLink by remember { mutableStateOf(prefs.getString("promo_link", "") ?: "") }
+    var repetitionDelay by remember { mutableIntStateOf(prefs.getInt("repetition_delay", 24)) }
+    var vipList by remember { mutableStateOf(prefs.getString("vip_list", "") ?: "") }
     
     val defaultDayMsg = "¡Buenas! Soy el técnico de mantenimiento. Ahora mismo estoy trabajando y no puedo atenderte bien por aquí. Escríbeme porfa a mi número personal {numero} y dime que quieres el DESCUENTO DEL MES. Así te paso un presupuesto rápido. ¡En cuanto pare un segundo te escribo!"
     val defaultNightMsg = "¡Buenas! Soy el técnico de mantenimiento. Ya he terminado por hoy. Para dejarte el presupuesto listo para mañana a primera hora, escríbeme porfa a mi número personal {numero} mencionando el DESCUENTO DEL MES. ¡Mañana a primera hora te paso el precio con la oferta aplicada sin falta! ¡Gracias!"
     
     var msgDay by remember { mutableStateOf(prefs.getString("msg_day", defaultDayMsg) ?: defaultDayMsg) }
     var msgNight by remember { mutableStateOf(prefs.getString("msg_night", defaultNightMsg) ?: defaultNightMsg) }
+    
+    val defaultVipMsg = "¡Hola! He recibido tu mensaje. Como eres un contacto VIP, te respondo automáticamente aunque no haya usado palabras clave (solo cuando tengo la pantalla apagada). ¡En cuanto pueda te escribo!"
+    var msgVip by remember { mutableStateOf(prefs.getString("msg_vip", defaultVipMsg) ?: defaultVipMsg) }
 
     // --- HORARIOS DINÁMICOS ---
     var startHourMonSat by remember { mutableIntStateOf(prefs.getInt("start_hour_mon_sat", 8)) }
@@ -382,10 +436,21 @@ fun MainScreen(activity: MainActivity) {
             }
             
             item {
+                val isExhausted = !isPro && usageCount >= 30
                 AutomationCard(
                     isEnabled = isRobotEnabled,
+                    isSoundEnabled = isSoundEnabled,
+                    onSoundToggle = { 
+                        isSoundEnabled = it
+                        prefs.edit().putBoolean("sound_enabled", it).apply()
+                        if (it) {
+                            activity.playActivationSound()
+                        }
+                    },
                     hasPerms = hasNotifPerm && isIgnoringBattery,
                     isPro = isPro || usageCount < 30,
+                    isExhausted = isExhausted,
+                    onPayClick = { showPaymentDialog = true },
                     pulseAlpha = pulseAlpha,
                     onToggle = { newValue -> 
                         if (!newValue) {
@@ -393,6 +458,9 @@ fun MainScreen(activity: MainActivity) {
                         } else {
                             isRobotEnabled = true
                             prefs.edit().putBoolean("service_enabled", true).apply()
+                            if (isSoundEnabled) {
+                                activity.playActivationSound()
+                            }
                         }
                     }
                 )
@@ -400,7 +468,7 @@ fun MainScreen(activity: MainActivity) {
 
             item {
                 SectionTitle(
-                    title = "PASO 1: CONFIGURACIÓN DE PERMISOS",
+                    title = "PASO 1: AJUSTES DE PERMISOS",
                     icon = Icons.Default.Settings,
                     isExpanded = isSettingsExpanded,
                     onToggle = { userExpandedSettings = !isSettingsExpanded },
@@ -437,10 +505,44 @@ fun MainScreen(activity: MainActivity) {
                         onKeywordsChange = { keywords = it; prefs.edit().putString("keywords", it).apply() },
                         techNumber = techNumber,
                         onTechNumberChange = { techNumber = it; prefs.edit().putString("tech_number", it).apply() },
+                        blacklist = blacklist,
+                        onBlacklistChange = { blacklist = it; prefs.edit().putString("blacklist", it).apply() },
+                        promoLink = promoLink,
+                        onPromoLinkChange = { promoLink = it; prefs.edit().putString("promo_link", it).apply() },
+                        repetitionDelay = repetitionDelay,
+                        onRepetitionDelayChange = { repetitionDelay = it; prefs.edit().putInt("repetition_delay", it).apply() },
+                        vipList = vipList,
+                        onVipListChange = { vipList = it; prefs.edit().putString("vip_list", it).apply() },
+                        onPickContact = { isForVip ->
+                            if (hasContactsPerm) {
+                                activity.pickContact { pickedName ->
+                                    val current = if (isForVip) vipList.trim() else blacklist.trim()
+                                    val newList = if (current.isEmpty()) {
+                                        pickedName
+                                    } else if (current.endsWith(",")) {
+                                        "$current $pickedName"
+                                    } else {
+                                        "$current, $pickedName"
+                                    }
+                                    
+                                    if (isForVip) {
+                                        vipList = newList
+                                        prefs.edit().putString("vip_list", newList).apply()
+                                    } else {
+                                        blacklist = newList
+                                        prefs.edit().putString("blacklist", newList).apply()
+                                    }
+                                }
+                            } else {
+                                activity.requestContactsPermission()
+                            }
+                        },
                         msgDay = msgDay,
                         onMsgDayChange = { msgDay = it; prefs.edit().putString("msg_day", it).apply() },
                         msgNight = msgNight,
                         onMsgNightChange = { msgNight = it; prefs.edit().putString("msg_night", it).apply() },
+                        msgVip = msgVip,
+                        onMsgVipChange = { msgVip = it; prefs.edit().putString("msg_vip", it).apply() },
                         startMS = startHourMonSat,
                         endMS = endHourMonSat,
                         onOpenMS = { showHourPickerMonSat = true },
@@ -490,6 +592,35 @@ fun MainScreen(activity: MainActivity) {
                             )
                         }
                     }
+                }
+            }
+
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "AutoResponder Pro v3.0",
+                        color = Color.White.copy(alpha = 0.3f),
+                        fontSize = 11.sp
+                    )
+                    TextButton(onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://asurpan.github.io/AutoResponder/es/politica.html"))
+                        context.startActivity(intent)
+                    }) {
+                        Text(
+                            "Política de Privacidad y Términos Legales",
+                            color = TurquoiseNeon.copy(alpha = 0.6f),
+                            fontSize = 12.sp,
+                            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                        )
+                    }
+                    Text(
+                        "© 2026 Lorensoft. Todos los derechos reservados.",
+                        color = Color.White.copy(alpha = 0.2f),
+                        fontSize = 10.sp
+                    )
                 }
             }
         }
@@ -630,6 +761,7 @@ fun MainScreen(activity: MainActivity) {
                                         .putString("tpl_tech_number", techNumber)
                                         .putString("tpl_msg_day", msgDay)
                                         .putString("tpl_msg_night", msgNight)
+                                        .putString("tpl_msg_vip", msgVip)
                                         .apply()
                                     Toast.makeText(context, "✅ Configuración actual grabada", Toast.LENGTH_SHORT).show()
                                 },
@@ -649,9 +781,10 @@ fun MainScreen(activity: MainActivity) {
                                         val n = prefs.getString("tpl_tech_number", "") ?: ""
                                         val d = prefs.getString("tpl_msg_day", "") ?: ""
                                         val g = prefs.getString("tpl_msg_night", "") ?: ""
+                                        val v = prefs.getString("tpl_msg_vip", "") ?: ""
                                         
-                                        keywords = k; techNumber = n; msgDay = d; msgNight = g
-                                        prefs.edit().putString("keywords", k).putString("tech_number", n).putString("msg_day", d).putString("msg_night", g).apply()
+                                        keywords = k; techNumber = n; msgDay = d; msgNight = g; msgVip = v
+                                        prefs.edit().putString("keywords", k).putString("tech_number", n).putString("msg_day", d).putString("msg_night", g).putString("msg_vip", v).apply()
                                         Toast.makeText(context, "✅ Tu plantilla ha sido cargada", Toast.LENGTH_SHORT).show()
                                     } else {
                                         // Cargar textos originales si no hay plantilla
@@ -1053,7 +1186,7 @@ fun LicenseWaterCard(count: Int, isPro: Boolean, onLongClick: () -> Unit, onActi
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = if (isPro) "LICENCIA PREMIUM" else "ESTADO DEL DEPÓSITO",
+                        text = if (isPro) "LICENCIA PREMIUM" else "CRÉDITOS DE PRUEBA",
                         color = Color.White,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 14.sp,
@@ -1183,8 +1316,12 @@ fun DetailItem(label: String, value: String) {
 @Composable
 fun AutomationCard(
     isEnabled: Boolean,
+    isSoundEnabled: Boolean,
+    onSoundToggle: (Boolean) -> Unit,
     hasPerms: Boolean,
     isPro: Boolean,
+    isExhausted: Boolean,
+    onPayClick: () -> Unit,
     pulseAlpha: Float,
     onToggle: (Boolean) -> Unit
 ) {
@@ -1196,50 +1333,104 @@ fun AutomationCard(
         colors = CardDefaults.cardColors(containerColor = if (active) OceanSurface else OceanSurface.copy(alpha = 0.5f)),
         border = BorderStroke(1.dp, if (active) TurquoiseNeon.copy(alpha = 0.4f) else GlassWhite)
     ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                if (active) {
-                    Box(modifier = Modifier.size(48.dp).alpha(pulseAlpha).background(TurquoiseNeon.copy(alpha = 0.2f), CircleShape))
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (active) {
+                        Box(modifier = Modifier.size(48.dp).alpha(pulseAlpha).background(TurquoiseNeon.copy(alpha = 0.2f), CircleShape))
+                    }
+                    Icon(
+                        imageVector = if (active) Icons.Default.AutoMode else Icons.Default.PauseCircle,
+                        contentDescription = null,
+                        tint = if (active) TurquoiseNeon else Color.White.copy(alpha = 0.4f),
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = if (active) "ROBOT OPERATIVO" else "ROBOT DETENIDO",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 16.sp,
+                        letterSpacing = 1.sp,
+                        color = if (active) TurquoiseNeon else Color.White
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    val statusText = when {
+                        isExhausted -> "⚠️ Prueba agotada. Activa Premium"
+                        !hasPerms -> "Faltan permisos (Paso 1)"
+                        active -> "Respondiendo a clientes..."
+                        else -> "Activa el interruptor para empezar"
+                    }
+                    
+                    Text(
+                        text = statusText,
+                        fontSize = 12.sp,
+                        color = if (isExhausted) Color(0xFFFF4B4B) else Color.White.copy(alpha = 0.6f)
+                    )
+                }
+
+                Switch(
+                    checked = isEnabled,
+                    onCheckedChange = onToggle,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = TurquoiseNeon,
+                        checkedTrackColor = TurquoiseNeon.copy(alpha = 0.3f),
+                        uncheckedThumbColor = Color.White.copy(alpha = 0.4f),
+                        uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
+                    )
+                )
+            }
+            
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = GlassWhite)
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().clickable { onSoundToggle(!isSoundEnabled) }
+            ) {
                 Icon(
-                    imageVector = if (active) Icons.Default.AutoMode else Icons.Default.PauseCircle,
+                    imageVector = if (isSoundEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
                     contentDescription = null,
-                    tint = if (active) TurquoiseNeon else Color.White.copy(alpha = 0.4f),
-                    modifier = Modifier.size(24.dp)
+                    tint = if (isSoundEnabled) MintElectric else Color.White.copy(alpha = 0.4f),
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Sonido \"Bep Bep\" al detectar cliente",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
+                )
+                Switch(
+                    checked = isSoundEnabled,
+                    onCheckedChange = onSoundToggle,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MintElectric,
+                        checkedTrackColor = MintElectric.copy(alpha = 0.3f)
+                    ),
+                    modifier = Modifier.scale(0.8f)
                 )
             }
 
-            Spacer(modifier = Modifier.width(20.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (active) "ROBOT OPERATIVO" else "ROBOT DETENIDO",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 16.sp,
-                    letterSpacing = 1.sp,
-                    color = if (active) TurquoiseNeon else Color.White
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = if (active) "Respondiendo a clientes..." else "Activa los permisos para empezar",
-                    fontSize = 12.sp,
-                    color = Color.White.copy(alpha = 0.6f)
-                )
+            if (isExhausted) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onPayClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = TurquoiseNeon, contentColor = OceanDeep)
+                ) {
+                    Icon(Icons.Default.Stars, null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("VER OPCIONES DE PAGO", fontWeight = FontWeight.Bold)
+                }
             }
-
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = onToggle,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = TurquoiseNeon,
-                    checkedTrackColor = TurquoiseNeon.copy(alpha = 0.3f),
-                    uncheckedThumbColor = Color.White.copy(alpha = 0.4f),
-                    uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
-                )
-            )
         }
     }
 }
@@ -1275,9 +1466,10 @@ fun SettingsGrid(
         
         // Guía de Batería
         Column(modifier = Modifier.padding(start = 8.dp, bottom = 4.dp, top = 8.dp)) {
-            Text("IMPORTANTE: Elige 'Sin Restricciones' para que el robot no se duerma.", color = MintElectric.copy(alpha = 0.6f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            Text("GUÍA XIAOMI: 1. Uso de batería -> 2. Pulsa en 'En segundo plano' -> 3. Elige 'SIN RESTRICCIONES'.", color = MintElectric.copy(alpha = 0.8f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
         }
         SettingsItem("3. Optimización de Batería", hasBattery) { 
+            Toast.makeText(context, "⚠️ Pulsa 'Uso de batería', entra en 'Segundo plano' y elige 'SIN RESTRICCIONES'", Toast.LENGTH_LONG).show()
             context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply { data = android.net.Uri.fromParts("package", context.packageName, null) }) 
         }
     }
@@ -1299,7 +1491,7 @@ fun NotificationInstructionCard(isVerified: Boolean, onVerifyChange: (Boolean) -
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                "Para que el robot pueda responder, necesita leer el texto de tus mensajes. Sigue estos pasos en tu móvil:",
+                "El robot responde leyendo el texto de tus NOTIFICACIONES. Por seguridad, nunca entra en tus chats privados. Para que funcione, sigue estos pasos:",
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 12.sp
             )
@@ -1385,20 +1577,42 @@ fun SectionTitle(
     onToggle: (() -> Unit)?,
     isComplete: Boolean
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.5f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "sectionPulse"
+    )
+
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(enabled = onToggle != null) { onToggle?.invoke() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (!isComplete) {
+                    Modifier
+                        .background(Color(0xFFFF4B4B).copy(alpha = 0.05f * pulseAlpha), RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0xFFFF4B4B).copy(alpha = 0.2f * pulseAlpha), RoundedCornerShape(12.dp))
+                } else Modifier
+            )
+            .clickable(enabled = onToggle != null) { onToggle?.invoke() }
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(modifier = Modifier.size(32.dp).background(TurquoiseNeon.copy(alpha = 0.1f), RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
-            Icon(icon, null, tint = TurquoiseNeon, modifier = Modifier.size(18.dp))
+        Box(modifier = Modifier.size(32.dp).background(if (isComplete) TurquoiseNeon.copy(alpha = 0.1f) else Color(0xFFFF4B4B).copy(alpha = 0.1f), RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
+            Icon(icon, null, tint = if (isComplete) TurquoiseNeon else Color(0xFFFF4B4B), modifier = Modifier.size(18.dp))
         }
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = title,
-            color = Color.White,
+            color = if (isComplete) Color.White else Color(0xFFFF4B4B).copy(alpha = 0.8f + (0.2f * pulseAlpha)),
             fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
-            letterSpacing = 1.sp,
+            fontSize = 11.sp,
+            letterSpacing = 0.sp,
+            maxLines = 1,
             modifier = Modifier.weight(1f)
         )
         if (isComplete) {
@@ -1407,9 +1621,10 @@ fun SectionTitle(
         }
         if (onToggle != null) {
             Icon(
-                if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                null,
-                tint = Color.White.copy(alpha = 0.3f)
+                imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = null,
+                tint = if (isExpanded) TurquoiseNeon.copy(alpha = pulseAlpha) else Color.White.copy(alpha = 0.3f),
+                modifier = Modifier.size(48.dp).padding(4.dp)
             )
         }
     }
@@ -1417,7 +1632,15 @@ fun SectionTitle(
 
 @Composable
 fun ActivityTerminal(logs: String, onTestClick: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = "Esta pantalla te permite ver el 'cerebro' del robot trabajando en tiempo real. Aquí verás cuando detecta un mensaje, comprueba tus palabras clave y prepara la respuesta. Es la mejor forma de confirmar que todo está funcionando perfectamente.",
+            color = Color.White.copy(alpha = 0.7f),
+            fontSize = 11.sp,
+            lineHeight = 16.sp,
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
+        
         Card(
             modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
             colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.4f)),
@@ -1464,13 +1687,25 @@ fun EmptyLeadsPlaceholder() {
 fun AssistantConfigPanel(
     keywords: String, onKeywordsChange: (String) -> Unit,
     techNumber: String, onTechNumberChange: (String) -> Unit,
+    blacklist: String, onBlacklistChange: (String) -> Unit,
+    promoLink: String, onPromoLinkChange: (String) -> Unit,
+    repetitionDelay: Int, onRepetitionDelayChange: (Int) -> Unit,
+    vipList: String, onVipListChange: (String) -> Unit,
+    onPickContact: (Boolean) -> Unit,
     msgDay: String, onMsgDayChange: (String) -> Unit,
     msgNight: String, onMsgNightChange: (String) -> Unit,
+    msgVip: String, onMsgVipChange: (String) -> Unit,
     startMS: Int, endMS: Int, onOpenMS: () -> Unit,
     startS: Int, endS: Int, onOpenS: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ConfigTextField("PALABRAS CLAVE (separadas por comas)", keywords, onKeywordsChange, isMultiline = true)
+        ConfigTextField(
+            label = "PALABRAS CLAVE (separadas por comas)", 
+            value = keywords, 
+            onValueChange = onKeywordsChange, 
+            isMultiline = true,
+            description = "Escribe las palabras que detecta el robot para capturar al cliente automáticamente."
+        )
         ConfigTextField(
             label = "TU NÚMERO DE TELÉFONO", 
             value = techNumber, 
@@ -1478,38 +1713,199 @@ fun AssistantConfigPanel(
             description = "Pon el número donde quieres que contacten (el tuyo, el de un empleado o empresa)."
         )
         
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Card(
-                onClick = onOpenMS,
-                modifier = Modifier.weight(1f),
-                colors = CardDefaults.cardColors(containerColor = OceanSurface),
-                border = BorderStroke(1.dp, GlassWhite)
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text("LUN - SÁB", color = TurquoiseNeon, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text("${startMS.toString().padStart(2, '0')}:00 - ${endMS.toString().padStart(2, '0')}:00", color = Color.White, fontSize = 13.sp)
+        ConfigTextField(
+            label = "LISTA NEGRA (Nombres o números a ignorar)", 
+            value = blacklist, 
+            onValueChange = onBlacklistChange,
+            description = "Contactos que el robot debe ignorar siempre. Separa por comas.",
+            trailingIcon = {
+                IconButton(onClick = { onPickContact(false) }) {
+                    Icon(Icons.Default.PersonAdd, null, tint = TurquoiseNeon)
                 }
             }
-            Card(
-                onClick = onOpenS,
-                modifier = Modifier.weight(1f),
-                colors = CardDefaults.cardColors(containerColor = OceanSurface),
-                border = BorderStroke(1.dp, GlassWhite)
+        )
+
+        ConfigTextField(
+            label = "ENLACE / CATÁLOGO (Opcional)", 
+            value = promoLink, 
+            onValueChange = onPromoLinkChange,
+            description = "Se pegará al final del mensaje. Úsalo para tu catálogo de WhatsApp o web."
+        )
+
+        // --- NUEVA SECCIÓN VIP ---
+        var isVipExpanded by rememberSaveable { mutableStateOf(false) }
+        
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(GoldPro.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+                .border(1.dp, GoldPro.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                .clickable { isVipExpanded = !isVipExpanded }
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text("DOMINGOS", color = TurquoiseNeon, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text("${startS.toString().padStart(2, '0')}:00 - ${endS.toString().padStart(2, '0')}:00", color = Color.White, fontSize = 13.sp)
+                Icon(Icons.Default.Stars, null, tint = GoldPro, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    "CONTACTOS VIP (RESPUESTA TOTAL)", 
+                    color = Color.White, 
+                    fontWeight = FontWeight.Bold, 
+                    fontSize = 12.sp,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (isVipExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = GoldPro.copy(alpha = 0.6f),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            AnimatedVisibility(visible = isVipExpanded) {
+                Column {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        "El robot responderá a estas personas aunque NO usen palabras clave, pero solo cuando tengas la PANTALLA APAGADA. Úsalo para familia o socios.", 
+                        color = Color.White.copy(alpha = 0.6f), 
+                        fontSize = 11.sp, 
+                        lineHeight = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ConfigTextField(
+                        label = "LISTA VIP", 
+                        value = vipList, 
+                        onValueChange = onVipListChange,
+                        trailingIcon = {
+                            IconButton(onClick = { onPickContact(true) }) {
+                                Icon(Icons.Default.Stars, null, tint = GoldPro)
+                            }
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ConfigTextField("MENSAJE EXCLUSIVO PARA VIP", msgVip, onMsgVipChange, isMultiline = true)
                 }
             }
         }
 
-        ConfigTextField("MENSAJE DE DÍA", msgDay, onMsgDayChange, isMultiline = true)
-        ConfigTextField("MENSAJE DE NOCHE", msgNight, onMsgNightChange, isMultiline = true)
+        AnimatedVisibility(visible = !isVipExpanded) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column {
+                    Text("HORARIO COMERCIAL", color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+                    Text("Define tu horario comercial para que el robot sepa cuándo enviar el mensaje de DÍA o el de NOCHE.", color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, modifier = Modifier.padding(start = 4.dp, bottom = 8.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Card(
+                            onClick = onOpenMS,
+                            modifier = Modifier.weight(1f),
+                            colors = CardDefaults.cardColors(containerColor = OceanSurface),
+                            border = BorderStroke(1.dp, GlassWhite)
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text("LUN - SÁB", color = TurquoiseNeon, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text("${startMS.toString().padStart(2, '0')}:00 - ${endMS.toString().padStart(2, '0')}:00", color = Color.White, fontSize = 13.sp)
+                            }
+                        }
+                        Card(
+                            onClick = onOpenS,
+                            modifier = Modifier.weight(1f),
+                            colors = CardDefaults.cardColors(containerColor = OceanSurface),
+                            border = BorderStroke(1.dp, GlassWhite)
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text("DOMINGOS", color = TurquoiseNeon, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text("${startS.toString().padStart(2, '0')}:00 - ${endS.toString().padStart(2, '0')}:00", color = Color.White, fontSize = 13.sp)
+                            }
+                        }
+                    }
+                }
+
+                ConfigTextField("MENSAJE DE DÍA", msgDay, onMsgDayChange, isMultiline = true)
+                ConfigTextField("MENSAJE DE NOCHE", msgNight, onMsgNightChange, isMultiline = true)
+
+                // --- SECCIÓN FRECUENCIA (MINIMIZADA) ---
+                var isFreqExpanded by rememberSaveable { mutableStateOf(false) }
+                
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(TurquoiseNeon.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+                        .border(1.dp, TurquoiseNeon.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                        .clickable { isFreqExpanded = !isFreqExpanded }
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Timer, null, tint = TurquoiseNeon, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            "FRECUENCIA DE RESPUESTA", 
+                            color = Color.White, 
+                            fontWeight = FontWeight.Bold, 
+                            fontSize = 12.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            imageVector = if (isFreqExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = null,
+                            tint = TurquoiseNeon.copy(alpha = 0.6f),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                    AnimatedVisibility(visible = isFreqExpanded) {
+                        Column {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                "¿Cuánto tiempo debe esperar el robot para volver a contestar a la misma persona?", 
+                                color = Color.White.copy(alpha = 0.6f), 
+                                fontSize = 11.sp, 
+                                lineHeight = 14.sp
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            val options = listOf(0 to "Siempre responder", 1 to "Esperar 1 hora", 12 to "Esperar 12 horas", 24 to "Esperar 24 horas")
+                            
+                            options.forEach { (value, label) ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth().clickable { onRepetitionDelayChange(value) }.padding(vertical = 4.dp)
+                                ) {
+                                    RadioButton(
+                                        selected = repetitionDelay == value,
+                                        onClick = { onRepetitionDelayChange(value) },
+                                        colors = RadioButtonDefaults.colors(selectedColor = TurquoiseNeon, unselectedColor = Color.White.copy(alpha = 0.3f))
+                                    )
+                                    Text(label, color = if (repetitionDelay == value) TurquoiseNeon else Color.White.copy(alpha = 0.8f), fontSize = 13.sp)
+                                }
+                            }
+                            
+                            if (repetitionDelay == 0) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFF4B4B).copy(alpha = 0.1f)), border = BorderStroke(1.dp, Color(0xFFFF4B4B).copy(alpha = 0.2f))) {
+                                    Text("Ojo: Al contestar siempre, podrías ser muy pesado si el cliente escribe mucho.", modifier = Modifier.padding(8.dp), color = Color(0xFFFF4B4B), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun ConfigTextField(label: String, value: String, onValueChange: (String) -> Unit, isMultiline: Boolean = false, description: String? = null) {
+fun ConfigTextField(
+    label: String, 
+    value: String, 
+    onValueChange: (String) -> Unit, 
+    isMultiline: Boolean = false, 
+    description: String? = null,
+    trailingIcon: @Composable (() -> Unit)? = null
+) {
     Column {
         Text(label, color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
         if (description != null) {
@@ -1527,7 +1923,8 @@ fun ConfigTextField(label: String, value: String, onValueChange: (String) -> Uni
             ),
             shape = RoundedCornerShape(16.dp),
             minLines = if (isMultiline) 3 else 1,
-            maxLines = if (isMultiline) 5 else 1
+            maxLines = if (isMultiline) 5 else 1,
+            trailingIcon = trailingIcon
         )
     }
 }
