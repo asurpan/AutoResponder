@@ -17,6 +17,7 @@
 
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Lorensoft">
     <meta property="og:title" content="AutoResponder Pro - WhatsApp Automation for Pros">
     <meta property="og:description" content="Never lose another quote while working. Automate your replies and capture leads on WhatsApp instantly.">
     <meta property="og:url" content="https://asurpan.github.io/AutoResponder/en/index.html">
@@ -24,6 +25,7 @@
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Lorensoft">
     <meta name="twitter:title" content="AutoResponder Pro - Lorensoft">
     <meta name="twitter:description" content="Smart WhatsApp automation for technical services and freelancers.">
     <meta name="twitter:image" content="https://asurpan.github.io/AutoResponder/github_assets/screenshot2.jpeg">
@@ -145,6 +147,31 @@
         .niche-item h3 { color: var(--primary); margin: 15px 0 10px; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
         .niche-item p { color: var(--text-light); font-size: 0.95em; margin: 0; }
 
+        .share-section {
+            background: var(--bg-light);
+            padding: 40px 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 60px;
+        }
+        .share-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .btn-share {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+        .btn-share:hover { opacity: 0.8; }
+        .bg-whatsapp { background-color: #25D366; }
+        .bg-facebook { background-color: #1877F2; }
+        .bg-twitter { background-color: #000000; }
+
         footer {
             padding: 40px 0;
             border-top: 1px solid var(--border);
@@ -154,7 +181,7 @@
         }
 
         @media (max-width: 768px) {
-            h1 { font-size: 2em; }
+            h1 { font-size: 2.2em; }
             .section-padding { padding: 50px 0; }
         }
     </style>
@@ -286,6 +313,16 @@
             </div>
         </div>
     </section>
+
+    <div class="share-section">
+        <h3 style="color: var(--primary);">Know another professional who needs this?</h3>
+        <p style="color: var(--text-light); font-size: 0.9em;">Help us grow by sharing this tool.</p>
+        <div class="share-buttons">
+            <a href="https://api.whatsapp.com/send?text=Check%20out%20this%20app%20to%20automate%20WhatsApp%20and%20capture%20leads:%20https://asurpan.github.io/AutoResponder/en/index.html" class="btn-share bg-whatsapp" target="_blank">WhatsApp</a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=https://asurpan.github.io/AutoResponder/en/index.html" class="btn-share bg-facebook" target="_blank">Facebook</a>
+            <a href="https://twitter.com/intent/tweet?text=Automate%20your%20WhatsApp%20replies%20with%20AutoResponder%20Pro:%20https://asurpan.github.io/AutoResponder/en/index.html" class="btn-share bg-twitter" target="_blank">X (Twitter)</a>
+        </div>
+    </div>
 
     <section class="section-padding" style="text-align: center;">
         <h2 style="font-size: 2.2em; color: var(--primary);">Take back control of your time</h2>

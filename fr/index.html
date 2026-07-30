@@ -17,6 +17,7 @@
 
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Lorensoft">
     <meta property="og:title" content="AutoResponder Pro - Automatisation pour Professionnels">
     <meta property="og:description" content="Ne perdez plus un seul devis pendant que vous travaillez. Automatisez vos réponses sur WhatsApp.">
     <meta property="og:url" content="https://asurpan.github.io/AutoResponder/fr/index.html">
@@ -139,6 +140,31 @@
         .niche-item h3 { color: var(--primary); margin: 15px 0 10px; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
         .niche-item p { color: var(--text-light); font-size: 0.95em; margin: 0; }
 
+        .share-section {
+            background: var(--bg-light);
+            padding: 40px 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 60px;
+        }
+        .share-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .btn-share {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+        .btn-share:hover { opacity: 0.8; }
+        .bg-whatsapp { background-color: #25D366; }
+        .bg-facebook { background-color: #1877F2; }
+        .bg-twitter { background-color: #000000; }
+
         footer {
             padding: 40px 0;
             border-top: 1px solid var(--border);
@@ -148,7 +174,7 @@
         }
 
         @media (max-width: 768px) {
-            h1 { font-size: 2em; }
+            h1 { font-size: 2.2em; }
             .section-padding { padding: 50px 0; }
         }
     </style>
@@ -280,6 +306,16 @@
             </div>
         </div>
     </section>
+
+    <div class="share-section">
+        <h3 style="color: var(--primary);">Connaissez-vous un autre professionnel qui en a besoin ?</h3>
+        <p style="color: var(--text-light); font-size: 0.9em;">Aidez-nous à grandir en partageant cet outil.</p>
+        <div class="share-buttons">
+            <a href="https://api.whatsapp.com/send?text=Découvrez%20cette%20application%20pour%20automatiser%20WhatsApp%20et%20capturer%20des%20prospects:%20https://asurpan.github.io/AutoResponder/fr/index.html" class="btn-share bg-whatsapp" target="_blank">WhatsApp</a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=https://asurpan.github.io/AutoResponder/fr/index.html" class="btn-share bg-facebook" target="_blank">Facebook</a>
+            <a href="https://twitter.com/intent/tweet?text=Automatisez%20vos%20réponses%20WhatsApp%20avec%20AutoResponder%20Pro:%20https://asurpan.github.io/AutoResponder/fr/index.html" class="btn-share bg-twitter" target="_blank">X (Twitter)</a>
+        </div>
+    </div>
 
     <section class="section-padding" style="text-align: center;">
         <h2 style="font-size: 2.2em; color: var(--primary);">Reprenez le contrôle de votre temps</h2>

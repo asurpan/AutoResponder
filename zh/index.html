@@ -15,10 +15,11 @@
     <link rel="alternate" hreflang="x-default" href="https://asurpan.github.io/AutoResponder/es/index.html" />
     <link rel="canonical" href="https://asurpan.github.io/AutoResponder/zh/index.html" />
 
-    <!-- Open Graph / Social Media -->
+    <!-- Open Graph / 社交媒体 -->
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Lorensoft">
     <meta property="og:title" content="AutoResponder Pro - 专业人士的自动化工具">
-    <meta property="og:description" content="工作时不再错过报价。自动处理 WhatsApp 回复。">
+    <meta property="og:description" content="在工作时不再错过报价。自动处理 WhatsApp 回复并获取潜在客户。">
     <meta property="og:url" content="https://asurpan.github.io/AutoResponder/zh/index.html">
     <meta property="og:image" content="https://asurpan.github.io/AutoResponder/github_assets/screenshot2.jpeg">
 
@@ -138,6 +139,31 @@
         .niche-item:hover { border-color: var(--border); background-color: var(--bg-light); }
         .niche-item h3 { color: var(--primary); margin: 15px 0 10px; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
         .niche-item p { color: var(--text-light); font-size: 0.95em; margin: 0; }
+
+        .share-section {
+            background: var(--bg-light);
+            padding: 40px 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 60px;
+        }
+        .share-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .btn-share {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+        .btn-share:hover { opacity: 0.8; }
+        .bg-whatsapp { background-color: #25D366; }
+        .bg-facebook { background-color: #1877F2; }
+        .bg-twitter { background-color: #000000; }
 
         footer {
             padding: 40px 0;
@@ -280,6 +306,16 @@
             </div>
         </div>
     </section>
+
+    <div class="share-section">
+        <h3 style="color: var(--primary);">认识其他需要此工具的专业人士吗？</h3>
+        <p style="color: var(--text-light); font-size: 0.9em;">分享此工具，帮助我们成长。</p>
+        <div class="share-buttons">
+            <a href="https://api.whatsapp.com/send?text=看看这款自动化%20WhatsApp%20并获取潜在客户的应用:%20https://asurpan.github.io/AutoResponder/zh/index.html" class="btn-share bg-whatsapp" target="_blank">WhatsApp</a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=https://asurpan.github.io/AutoResponder/zh/index.html" class="btn-share bg-facebook" target="_blank">Facebook</a>
+            <a href="https://twitter.com/intent/tweet?text=使用%20AutoResponder%20Pro%20自动回复您的%20WhatsApp%20消息:%20https://asurpan.github.io/AutoResponder/zh/index.html" class="btn-share bg-twitter" target="_blank">X (Twitter)</a>
+        </div>
+    </div>
 
     <section class="section-padding" style="text-align: center;">
         <h2 style="font-size: 2.2em; color: var(--primary);">重新掌控您的时间</h2>

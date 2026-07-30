@@ -17,6 +17,7 @@
 
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Lorensoft">
     <meta property="og:title" content="AutoResponder Pro - Automação para Profissionais">
     <meta property="og:description" content="Não perca mais orçamentos enquanto trabalha. Automatize suas respostas no WhatsApp.">
     <meta property="og:url" content="https://asurpan.github.io/AutoResponder/pt/index.html">
@@ -139,6 +140,31 @@
         .niche-item h3 { color: var(--primary); margin: 15px 0 10px; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
         .niche-item p { color: var(--text-light); font-size: 0.95em; margin: 0; }
 
+        .share-section {
+            background: var(--bg-light);
+            padding: 40px 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 60px;
+        }
+        .share-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .btn-share {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+        .btn-share:hover { opacity: 0.8; }
+        .bg-whatsapp { background-color: #25D366; }
+        .bg-facebook { background-color: #1877F2; }
+        .bg-twitter { background-color: #000000; }
+
         footer {
             padding: 40px 0;
             border-top: 1px solid var(--border);
@@ -182,7 +208,7 @@
     <section class="section-padding">
         <div class="alert-box">
             <h2>O problema: A resposta lenta mata a venda</h2>
-            <p>No setor de serviços, <b>80% dos clientes</b> contratam o primeiro profissional que lhes responde. Se você está ocupado e leva uma hora para responder, esse cliente já chamou a concorrência. <b>AutoResponder Pro resolve isso instantaneamente.</b></p>
+            <p>No setor de serviços, <b>80% dos clientes</b> contratam o primeiro profissional que lhes responde. Si você está ocupado e leva uma hora para responder, esse cliente já chamou a concorrência. <b>AutoResponder Pro resolve isso instantaneamente.</b></p>
         </div>
 
         <div class="card">
@@ -216,7 +242,7 @@
                         <svg class="icon icon-large" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     </div>
                     <p style="font-weight: 700;">Venda Garantida</p>
-                    <p>O cliente sente-se atendido e envia os dados. O trabalho é seu.</p>
+                    <p>O cliente sente-se atendido e envia os datos. O trabalho é seu.</p>
                 </div>
             </div>
         </div>
@@ -233,10 +259,10 @@
             <div class="niche-item">
                 <svg class="icon icon-large" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                 <h3>Eletricistas e Encanadores</h3>
-                <p>Atenda novas emergencias enquanto está focado em um serviço. Filtre chamados automaticamente.</p>
+                <p>Atenda novas emergências enquanto está focado em um serviço. Filtre chamados automaticamente.</p>
             </div>
             <div class="niche-item">
-                <svg class="icon icon-large" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1-1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <svg class="icon icon-large" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 <h3>Oficinas Mecânicas</h3>
                 <p>Informe suas tarifas base de manutenção enquanto está sob o veículo ou com as mãos sujas.</p>
             </div>
@@ -280,6 +306,16 @@
             </div>
         </div>
     </section>
+
+    <div class="share-section">
+        <h3 style="color: var(--primary);">Conhece outro profissional que precisa disso?</h3>
+        <p style="color: var(--text-light); font-size: 0.9em;">Ajude-nos a crescer compartilhando esta ferramenta.</p>
+        <div class="share-buttons">
+            <a href="https://api.whatsapp.com/send?text=Veja%20este%20app%20para%20automatizar%20o%20WhatsApp%20e%20não%20perder%20clientes:%20https://asurpan.github.io/AutoResponder/pt/index.html" class="btn-share bg-whatsapp" target="_blank">WhatsApp</a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=https://asurpan.github.io/AutoResponder/pt/index.html" class="btn-share bg-facebook" target="_blank">Facebook</a>
+            <a href="https://twitter.com/intent/tweet?text=Automatize%20suas%20respostas%20no%20WhatsApp%20com%20AutoResponder%20Pro:%20https://asurpan.github.io/AutoResponder/pt/index.html" class="btn-share bg-twitter" target="_blank">X (Twitter)</a>
+        </div>
+    </div>
 
     <section class="section-padding" style="text-align: center;">
         <h2 style="font-size: 2.2em; color: var(--primary);">Retome o controle do seu tempo</h2>
