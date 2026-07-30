@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoResponder Pro - 手忙脚乱也能做成生意</title>
-    <meta name="description" content="不要再错过任何报价。工作时自动通过 WhatsApp 获取客户。个体经营者和专业人士的终极助手。">
+    <title>AutoResponder Pro - 专业人士的 WhatsApp 自动化工具</title>
+    <meta name="description" content="节省时间并自动获取客户。为自由职业者、水暖工、机械师和技术服务量身定制的智能回复工具。">
 
-    <!-- 国际 SEO / Hreflang -->
+    <!-- 国际 SEO -->
     <link rel="alternate" hreflang="es" href="https://asurpan.github.io/AutoResponder/es/index.html" />
     <link rel="alternate" hreflang="en" href="https://asurpan.github.io/AutoResponder/en/index.html" />
     <link rel="alternate" hreflang="fr" href="https://asurpan.github.io/AutoResponder/fr/index.html" />
@@ -15,280 +15,253 @@
     <link rel="alternate" hreflang="x-default" href="https://asurpan.github.io/AutoResponder/es/index.html" />
     <link rel="canonical" href="https://asurpan.github.io/AutoResponder/zh/index.html" />
 
-    <!-- 全局元标签 -->
-    <meta name="geo.region" content="CN;HK;TW;SG" />
-    <meta name="robots" content="index, follow">
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ocean-deep: #000B18;
-            --ocean-surface: #001F33;
-            --turquoise: #00F5D4;
-            --mint: #20FF8C;
-            --glass: rgba(255, 255, 255, 0.05);
-            --danger: #FF4B4B;
+            --primary: #1a365d;
+            --accent: #2b6cb0;
+            --success: #38a169;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --border: #e2e8f0;
         }
         body {
-            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            font-family: 'Inter', 'Microsoft YaHei', sans-serif;
             line-height: 1.6;
-            color: #fff;
+            color: var(--text-dark);
             margin: 0;
             padding: 0;
-            background-color: var(--ocean-deep);
+            background-color: #fff;
         }
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
-        /* 导航及语言选择器 */
         nav {
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            padding: 10px 20px;
+            background: #fff;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--glass);
-            display: flex;
-            justify-content: center;
-            gap: 15px;
+            z-index: 1000;
         }
-        .lang-link {
-            text-decoration: none;
-            font-size: 0.8em;
-            color: #fff;
-            opacity: 0.6;
-            transition: opacity 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .lang-link:hover, .lang-link.active { opacity: 1; color: var(--turquoise); }
+        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 700; color: var(--primary); font-size: 1.2em; text-decoration: none; }
+        .lang-selector { display: flex; gap: 12px; }
+        .lang-selector a { text-decoration: none; font-size: 0.85em; color: var(--text-light); font-weight: 600; }
+        .lang-selector a.active { color: var(--accent); }
 
-        /* 页眉及 Hero */
         header {
+            padding: 80px 0;
+            background-color: var(--bg-light);
             text-align: center;
-            padding: 80px 20px;
-            background: radial-gradient(circle at center, var(--ocean-surface), var(--ocean-deep));
-            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         h1 {
-            font-size: 3.5em;
-            font-weight: 800;
+            font-size: 3em;
+            color: var(--primary);
             margin: 0;
-            line-height: 1.1;
-            background: linear-gradient(to right, var(--turquoise), var(--mint));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .hero-sub { font-size: 1.4em; opacity: 0.9; margin-top: 20px; font-weight: 600; color: var(--mint); }
-        .hero-desc { max-width: 700px; margin: 20px auto; opacity: 0.7; font-size: 1.1em; }
-
-        /* 问题部分 */
-        .problem-section {
-            background: rgba(255, 75, 75, 0.05);
-            border: 1px solid rgba(255, 75, 75, 0.2);
-            padding: 40px;
-            border-radius: 30px;
-            text-align: center;
-            margin: 40px 0;
-        }
-        .problem-section h2 { color: var(--danger); margin-top: 0; }
-
-        /* 真实场景 */
-        .scenario-box {
-            background: var(--ocean-surface);
-            border-radius: 30px;
-            padding: 40px;
-            margin: 60px 0;
-            border: 1px solid var(--glass);
-        }
-        .scenario-box h2 { text-align: center; color: var(--turquoise); margin-bottom: 40px; }
-        .scenario-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .step-card {
-            background: var(--glass);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid transparent;
-        }
-        .step-card.active { border-color: var(--turquoise); background: rgba(0, 245, 212, 0.05); }
-        .step-icon { font-size: 2em; margin-bottom: 10px; display: block; }
-        .whatsapp-msg {
-            background: #25D366;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 15px 15px 15px 0;
-            font-size: 0.85em;
-            text-align: left;
-            margin: 10px 0;
-            display: inline-block;
-        }
-        .bot-msg {
-            background: #34B7F1;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 15px 15px 0 15px;
-            font-size: 0.85em;
-            text-align: left;
-            margin: 10px 0;
-            display: inline-block;
-        }
-
-        /* 行业 */
-        .niche-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin: 60px 0; }
-        .niche-card {
-            background: var(--glass);
-            padding: 30px;
-            border-radius: 25px;
-            transition: all 0.3s;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .niche-card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.08); border-color: var(--turquoise); }
-        .niche-card h3 { color: var(--mint); margin-top: 0; display: flex; align-items: center; gap: 10px; }
-
-        /* 按钮 */
-        .cta-container { text-align: center; padding: 60px 20px; }
-        .btn-download {
-            display: inline-flex;
-            align-items: center;
-            background: var(--turquoise);
-            color: var(--ocean-deep);
-            padding: 20px 50px;
-            text-decoration: none;
-            border-radius: 20px;
             font-weight: 800;
-            font-size: 1.3em;
-            transition: all 0.3s;
-            box-shadow: 0 10px 30px rgba(0,245,212,0.3);
+            letter-spacing: -0.02em;
         }
-        .btn-download:hover { transform: scale(1.05); box-shadow: 0 15px 40px var(--turquoise); }
+        .hero-sub {
+            font-size: 1.25em;
+            color: var(--text-light);
+            max-width: 800px;
+            margin: 20px auto;
+        }
 
-        /* 页脚 */
-        footer { text-align: center; padding: 60px; opacity: 0.5; border-top: 1px solid var(--glass); }
-        .bizum-info { color: var(--mint); font-weight: bold; }
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover { background-color: var(--accent); transform: translateY(-1px); }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 2.2em; }
-            .scenario-steps { grid-template-columns: 1fr; }
+        .section-padding { padding: 80px 0; }
+        .alert-box {
+            background-color: #fffaf0;
+            border-left: 4px solid #ed8936;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        .alert-box h2 { color: #c05621; margin-top: 0; font-size: 1.5em; }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+        }
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+        .step { text-align: center; }
+        .step-icon { font-size: 1.5em; background: var(--bg-light); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto 15px; color: var(--accent); }
+
+        .msg { padding: 12px 16px; border-radius: 12px; font-size: 0.9em; margin-bottom: 10px; max-width: 90%; }
+        .msg-in { background: #edf2f7; align-self: flex-start; }
+        .msg-out { background: #ebf8ff; border: 1px solid #bee3f8; margin-left: auto; }
+
+        .niche-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .niche-item h3 { color: var(--primary); margin-top: 0; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
+        .niche-item p { color: var(--text-light); font-size: 0.95em; }
+
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .section-padding { padding: 50px 0; }
         }
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="../es/index.html" class="lang-link">🇪🇸 ES</a>
-    <a href="../en/index.html" class="lang-link">🇺🇸 EN</a>
-    <a href="../fr/index.html" class="lang-link">🇫🇷 FR</a>
-    <a href="../pt/index.html" class="lang-link">🇧🇷 PT</a>
-    <a href="../zh/index.html" class="lang-link active">🇨🇳 ZH</a>
+    <div class="container nav-flex">
+        <a href="#" class="logo">AutoResponder Pro</a>
+        <div class="lang-selector">
+            <a href="../es/index.html">ES</a>
+            <a href="../en/index.html">EN</a>
+            <a href="../fr/index.html">FR</a>
+            <a href="../pt/index.html">PT</a>
+            <a href="../zh/index.html" class="active">ZH</a>
+        </div>
+    </div>
 </nav>
 
 <header>
-    <div style="display: inline-block; padding: 5px 15px; border-radius: 50px; background: rgba(0,245,212,0.1); color: var(--turquoise); font-weight: bold; font-size: 0.8em; margin-bottom: 20px; border: 1px solid var(--turquoise);">
-        🚀 在您工作时为您工作的 APP
-    </div>
-    <h1>AutoResponder Pro</h1>
-    <p class="hero-sub">赚取利润。获取客户。无需触碰手机。</p>
-    <p class="hero-desc">厌倦了因为忙于工作而无法回复 WhatsApp 导致的订单流失吗？让机器人为您处理客户。</p>
-
-    <div style="margin-top: 40px;">
-        <a href="../app-release.apk" class="btn-download">免费下载 (30 条消息)</a>
+    <div class="container">
+        <h1>您的 WhatsApp 销售助手</h1>
+        <p class="hero-sub">工作忙碌时也不再错过任何报价。自动化您的回复，获取客户数据，无需触碰手机即可实现销量翻倍。</p>
+        <a href="../app-release.apk" class="btn btn-primary">免费下载 Android 版</a>
+        <p style="font-size: 0.85em; color: var(--text-light); margin-top: 15px;">包含 30 条免费测试消息。</p>
     </div>
 </header>
 
 <div class="container">
 
-    <section class="problem-section">
-        <h2>⚠️ 80% 的客户在 5 分钟内流失</h2>
-        <p>当客户向专业人士咨询时，如果得不到快速回复，他们会<b>直接咨询 Google 搜索结果中的下一位</b>。忙于工作可能会让您每月损失数百欧元的潜在订单。</p>
-    </section>
+    <section class="section-padding">
+        <div class="alert-box">
+            <h2>问题所在：响应慢会痛失订单</h2>
+            <p>在服务行业，<b>80% 的客户</b>会雇佣第一位回复的专业人士。如果您正忙于工作，一小时后才回复，客户早就联系了您的竞争对手。<b>AutoResponder Pro 助您瞬间解决此问题。</b></p>
+        </div>
 
-    <section class="scenario-box">
-        <h2>真实案例：忙碌的水管工</h2>
-        <div class="scenario-steps">
-            <div class="step-card">
-                <span class="step-icon">🧼</span>
-                <p><b>场景：</b>您正在修水管，双手湿冷或沾满污垢。</p>
-            </div>
-            <div class="step-card active">
-                <span class="step-icon">💬</span>
-                <div class="whatsapp-msg">“您好，<b>报价</b>是<b>多少</b>？什么时候能<b>来</b>？”</div>
-                <p><b>检测：</b>App 立即检测到关键词。</p>
-            </div>
-            <div class="step-card active">
-                <span class="step-icon">🤖</span>
-                <div class="bot-msg">“您好！我很快就会回复您。基础起步价为 35 欧元。请发给我一张故障照片……”</div>
-                <p><b>执行：</b>机器人在 20 秒内自动回复。留住客户。</p>
-            </div>
-            <div class="step-card">
-                <span class="step-icon">✅</span>
-                <p><b>结果：</b>当您完成工作时，客户已经发来了照片。成交！</p>
-            </div>
-        </div>
-    </section>
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary);">工作原理：真实场景</h2>
+            <p style="text-align: center; color: var(--text-light);">想象一下您是一名正在进行紧急维修的水暖工……</p>
 
-    <h2 style="text-align: center; font-size: 2.5em; color: var(--turquoise);">专为您的行业设计</h2>
-    <div class="niche-grid">
-        <div class="niche-card">
-            <h3>🪚 抛光与翻新</h3>
-            <p>即使机器轰鸣也能及时回复。不要因为没听到手机响就让客户流失到竞争对手那里。立即获取联系方式。</p>
-        </div>
-        <div class="niche-card">
-            <h3>⚡ 电工与水暖工</h3>
-            <p>在处理紧急情况时也能应对新的咨询。机器人会提供您的直拨电话，确保不漏掉任何 24 小时急修业务。</p>
-        </div>
-        <div class="niche-card">
-            <h3>🚗 汽车修理与维护</h3>
-            <p>在车底作业或满手油污时，自动告知保养或轮胎的基础价格。展现极致的专业形象。</p>
-        </div>
-        <div class="niche-card">
-            <h3>💼 销售与房地产</h3>
-            <p>当有人咨询房产或产品时立即回复。谁在 WhatsApp 上第一个回复，谁就能赢得约见和佣金。</p>
-        </div>
-        <div class="niche-card">
-            <h3>✂️ 美发与美容</h3>
-            <p>在为客户服务时也能管理预约或解答疑问。在不中断当前服务的情况下保持预约爆满。</p>
-        </div>
-        <div class="niche-card">
-            <h3>🚛 运输与搬家</h3>
-            <p>在驾驶时也能安全地回复报价请求，符合交通法规且无需脱离方向盘。</p>
-        </div>
-    </div>
-
-    <section style="background: var(--ocean-surface); padding: 50px; border-radius: 40px; text-align: center; border: 1px solid var(--glass);">
-        <h2 style="color: var(--mint);">为什么选择 AutoResponder Pro？</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 30px;">
-            <div>
-                <h4 style="color: var(--turquoise);">🛡️ 销售护盾</h4>
-                <p style="font-size: 0.9em; opacity: 0.7;">通过关键词过滤出真正有购买意向的客户。</p>
-            </div>
-            <div>
-                <h4 style="color: var(--turquoise);">🕒 真人模拟</h4>
-                <p style="font-size: 0.9em; opacity: 0.7;">不会像笨拙的机器人那样秒回。等待 20 秒，表现更自然。</p>
-            </div>
-            <div>
-                <h4 style="color: var(--turquoise);">📋 自动日程</h4>
-                <p style="font-size: 0.9em; opacity: 0.7;">自动保存意向客户的姓名和电话。您的数据库会自动增长。</p>
+            <div class="scenario-grid">
+                <div class="step">
+                    <div class="step-icon">1</div>
+                    <div class="msg msg-in">“你好，修理漏水要<b>多少钱</b>？什么时候能<b>过来</b>？”</div>
+                    <p><b>客户询问。</b><br>您无法触碰手机。</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <p style="color: var(--success); font-weight: 700;">智能检测</p>
+                    <p>机器人检测到关键词<i>“多少钱”</i>和<i>“过来”</i>。</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <div class="msg msg-out">“您好！我的起步价是 35 欧元。请发给我漏水的照片和您的地址。”</div>
+                    <p><b>自动回复。</b><br>20 秒内发出。</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">4</div>
+                    <p style="font-weight: 700;">稳拿订单</p>
+                    <p>客户感到已被接待并向您发送数据。订单到手。</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <div class="cta-container">
-        <h2 style="font-size: 2.2em;">一单挽回的生意就足以支付 100 倍的 App 费用</h2>
-        <p style="opacity: 0.8; margin-bottom: 40px;">立即尝试。您可以免费试用 30 条消息，亲眼见证客户盈门。</p>
-        <a href="../app-release.apk" class="btn-download">下载并安装 APK</a>
-
-        <div style="margin-top: 50px; border-top: 1px solid var(--glass); padding-top: 40px;">
-            <p>喜欢这款工具吗？<b>支持我们的开发</b></p>
-            <p style="font-size: 1.8em; margin: 10px 0;">一次性贡献：<span class="bizum-info">3.99€</span></p>
-            <p style="opacity: 0.7; font-size: 0.9em;">PayPal: <a href="https://www.paypal.me/appsaiber">paypal.me/appsaiber</a></p>
+    <section class="section-padding">
+        <h2 style="font-size: 2em; color: var(--primary); margin-bottom: 40px;">针对各行各业的解决方案</h2>
+        <div class="niche-grid">
+            <div class="niche-item">
+                <h3>🪚 装修与打磨</h3>
+                <p>在机器轰鸣时回复报价。不要让噪音使您失去新客户。</p>
+            </div>
+            <div class="niche-item">
+                <h3>⚡ 电工与水暖工</h3>
+                <p>在处理紧急情况时应对新咨询。自动过滤紧急工作。</p>
+            </div>
+            <div class="niche-item">
+                <h3>🚗 汽修店</h3>
+                <p>在车底作业或满手油污时告知您的基础保养价格。</p>
+            </div>
+            <div class="niche-item">
+                <h3>💼 商业与销售</h3>
+                <p>成为第一个回复意向客户的人。在销售中，速度是第一要素。</p>
+            </div>
+            <div class="niche-item">
+                <h3>✂️ 美容与美发</h3>
+                <p>在为当前客户服务时管理预约请求和常见问题。</p>
+            </div>
+            <div class="niche-item">
+                <h3>🚛 运输与搬家</h3>
+                <p>在驾驶时接收报价请求，符合道路安全法规。</p>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <section class="section-padding" style="text-align: center; border-top: 1px solid var(--border);">
+        <h2 style="color: var(--primary);">专业安全与效率</h2>
+        <p style="max-width: 700px; margin: 0 auto 40px; color: var(--text-light);">我们的应用旨在成为一款强大的工作工具。</p>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;">
+            <div style="max-width: 250px;">
+                <h4 style="color: var(--accent);">完全隐私</h4>
+                <p style="font-size: 0.9em; color: var(--text-light);">消息仅在您的手机上处理。我们不会在任何服务器上存储您的对话。</p>
+            </div>
+            <div style="max-width: 250px;">
+                <h4 style="color: var(--accent);">低功耗</h4>
+                <p style="font-size: 0.9em; color: var(--text-light);">针对不耗尽电池进行了算法优化。在后台静默运行。</p>
+            </div>
+            <div style="max-width: 250px;">
+                <h4 style="color: var(--accent);">客户日程</h4>
+                <p style="font-size: 0.9em; color: var(--text-light);">自动创建包含姓名和号码的意向客户列表，以便您稍后拨打。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding" style="text-align: center;">
+        <h2 style="font-size: 2.2em; color: var(--primary);">重新掌控您的时间</h2>
+        <p style="margin-bottom: 40px; color: var(--text-light);">立即安装应用，让机器人为您工作。</p>
+        <a href="../app-release.apk" class="btn btn-primary" style="font-size: 1.2em;">下载 APK 安装包</a>
+        <p style="margin-top: 20px; font-weight: 600; color: var(--success);">前 30 名客户完全免费。</p>
+    </section>
 
 </div>
 
 <footer>
-    <p>&copy; 2026 AutoResponder Pro. 由 Legendario Software 开发。<a href="politica.html">隐私政策</a></p>
+    <div class="container">
+        <p>&copy; 2026 AutoResponder Pro. 由 Legendario Software 开发。</p>
+        <p><a href="politica.html" style="color: var(--text-light);">隐私政策与条款</a></p>
+    </div>
 </footer>
 
 </body>

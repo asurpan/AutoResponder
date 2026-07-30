@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoResponder Pro - Vende más mientras tienes las manos ocupadas</title>
-    <meta name="description" content="No pierdas ni un presupuesto más. Captura clientes en WhatsApp automáticamente mientras trabajas. El asistente definitivo para autónomos y profesionales.">
+    <title>AutoResponder Pro - Automatización de WhatsApp para Profesionales</title>
+    <meta name="description" content="Ahorre tiempo y capture clientes automáticamente. La herramienta de respuesta inteligente para autónomos, fontaneros, mecánicos y servicios técnicos.">
 
-    <!-- SEO Internacional / Hreflang -->
+    <!-- SEO Internacional -->
     <link rel="alternate" hreflang="es" href="https://asurpan.github.io/AutoResponder/es/index.html" />
     <link rel="alternate" hreflang="en" href="https://asurpan.github.io/AutoResponder/en/index.html" />
     <link rel="alternate" hreflang="fr" href="https://asurpan.github.io/AutoResponder/fr/index.html" />
@@ -15,280 +15,261 @@
     <link rel="alternate" hreflang="x-default" href="https://asurpan.github.io/AutoResponder/es/index.html" />
     <link rel="canonical" href="https://asurpan.github.io/AutoResponder/es/index.html" />
 
-    <!-- Meta Tags Globales -->
-    <meta name="geo.region" content="ES;MX;AR;CO;CL;US" />
-    <meta name="robots" content="index, follow">
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ocean-deep: #000B18;
-            --ocean-surface: #001F33;
-            --turquoise: #00F5D4;
-            --mint: #20FF8C;
-            --glass: rgba(255, 255, 255, 0.05);
-            --danger: #FF4B4B;
+            --primary: #1a365d;
+            --accent: #2b6cb0;
+            --success: #38a169;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --border: #e2e8f0;
         }
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
-            color: #fff;
+            color: var(--text-dark);
             margin: 0;
             padding: 0;
-            background-color: var(--ocean-deep);
+            background-color: #fff;
         }
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
-        /* NAV & LANG SELECTOR */
+        /* NAVIGATION */
         nav {
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            padding: 10px 20px;
+            background: #fff;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--glass);
-            display: flex;
-            justify-content: center;
-            gap: 15px;
+            z-index: 1000;
         }
-        .lang-link {
-            text-decoration: none;
-            font-size: 0.8em;
-            color: #fff;
-            opacity: 0.6;
-            transition: opacity 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .lang-link:hover, .lang-link.active { opacity: 1; color: var(--turquoise); }
+        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 700; color: var(--primary); font-size: 1.2em; text-decoration: none; }
+        .lang-selector { display: flex; gap: 12px; }
+        .lang-selector a { text-decoration: none; font-size: 0.85em; color: var(--text-light); font-weight: 600; }
+        .lang-selector a.active { color: var(--accent); }
 
-        /* HEADER & HERO */
+        /* HERO SECTION */
         header {
+            padding: 80px 0;
+            background-color: var(--bg-light);
             text-align: center;
-            padding: 80px 20px;
-            background: radial-gradient(circle at center, var(--ocean-surface), var(--ocean-deep));
-            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         h1 {
-            font-size: 3.5em;
-            font-weight: 800;
+            font-size: 3em;
+            color: var(--primary);
             margin: 0;
-            line-height: 1.1;
-            background: linear-gradient(to right, var(--turquoise), var(--mint));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .hero-sub { font-size: 1.4em; opacity: 0.9; margin-top: 20px; font-weight: 600; color: var(--mint); }
-        .hero-desc { max-width: 700px; margin: 20px auto; opacity: 0.7; font-size: 1.1em; }
-
-        /* SECCIÓN EL PROBLEMA */
-        .problem-section {
-            background: rgba(255, 75, 75, 0.05);
-            border: 1px solid rgba(255, 75, 75, 0.2);
-            padding: 40px;
-            border-radius: 30px;
-            text-align: center;
-            margin: 40px 0;
-        }
-        .problem-section h2 { color: var(--danger); margin-top: 0; }
-
-        /* ESCENARIO REAL */
-        .scenario-box {
-            background: var(--ocean-surface);
-            border-radius: 30px;
-            padding: 40px;
-            margin: 60px 0;
-            border: 1px solid var(--glass);
-        }
-        .scenario-box h2 { text-align: center; color: var(--turquoise); margin-bottom: 40px; }
-        .scenario-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .step-card {
-            background: var(--glass);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid transparent;
-        }
-        .step-card.active { border-color: var(--turquoise); background: rgba(0, 245, 212, 0.05); }
-        .step-icon { font-size: 2em; margin-bottom: 10px; display: block; }
-        .whatsapp-msg {
-            background: #25D366;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 15px 15px 15px 0;
-            font-size: 0.85em;
-            text-align: left;
-            margin: 10px 0;
-            display: inline-block;
-        }
-        .bot-msg {
-            background: #34B7F1;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 15px 15px 0 15px;
-            font-size: 0.85em;
-            text-align: left;
-            margin: 10px 0;
-            display: inline-block;
-        }
-
-        /* NICHOS */
-        .niche-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin: 60px 0; }
-        .niche-card {
-            background: var(--glass);
-            padding: 30px;
-            border-radius: 25px;
-            transition: all 0.3s;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .niche-card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.08); border-color: var(--turquoise); }
-        .niche-card h3 { color: var(--mint); margin-top: 0; display: flex; align-items: center; gap: 10px; }
-
-        /* BOTONES */
-        .cta-container { text-align: center; padding: 60px 20px; }
-        .btn-download {
-            display: inline-flex;
-            align-items: center;
-            background: var(--turquoise);
-            color: var(--ocean-deep);
-            padding: 20px 50px;
-            text-decoration: none;
-            border-radius: 20px;
             font-weight: 800;
-            font-size: 1.3em;
-            transition: all 0.3s;
-            box-shadow: 0 10px 30px rgba(0,245,212,0.3);
+            letter-spacing: -0.02em;
         }
-        .btn-download:hover { transform: scale(1.05); box-shadow: 0 15px 40px var(--turquoise); }
+        .hero-sub {
+            font-size: 1.25em;
+            color: var(--text-light);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover { background-color: var(--accent); transform: translateY(-1px); }
+
+        /* PROBLEM SECTION */
+        .section-padding { padding: 80px 0; }
+        .alert-box {
+            background-color: #fffaf0;
+            border-left: 4px solid #ed8936;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        .alert-box h2 { color: #c05621; margin-top: 0; font-size: 1.5em; }
+
+        /* SCENARIO BOX */
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+        }
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+        .step { text-align: center; }
+        .step-icon { font-size: 1.5em; background: var(--bg-light); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto 15px; color: var(--accent); }
+
+        /* WHATSAPP MOCKUP */
+        .msg { padding: 12px 16px; border-radius: 12px; font-size: 0.9em; margin-bottom: 10px; max-width: 90%; }
+        .msg-in { background: #edf2f7; align-self: flex-start; }
+        .msg-out { background: #ebf8ff; border: 1px solid #bee3f8; margin-left: auto; }
+
+        /* NICHES */
+        .niche-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .niche-item h3 { color: var(--primary); margin-top: 0; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
+        .niche-item p { color: var(--text-light); font-size: 0.95em; }
 
         /* FOOTER */
-        footer { text-align: center; padding: 60px; opacity: 0.5; border-top: 1px solid var(--glass); }
-        .bizum-info { color: var(--mint); font-weight: bold; }
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 2.2em; }
-            .scenario-steps { grid-template-columns: 1fr; }
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .section-padding { padding: 50px 0; }
         }
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="../es/index.html" class="lang-link active">🇪🇸 ES</a>
-    <a href="../en/index.html" class="lang-link">🇺🇸 EN</a>
-    <a href="../fr/index.html" class="lang-link">🇫🇷 FR</a>
-    <a href="../pt/index.html" class="lang-link">🇧🇷 PT</a>
-    <a href="../zh/index.html" class="lang-link">🇨🇳 ZH</a>
+    <div class="container nav-flex">
+        <a href="#" class="logo">AutoResponder Pro</a>
+        <div class="lang-selector">
+            <a href="../es/index.html" class="active">ES</a>
+            <a href="../en/index.html">EN</a>
+            <a href="../fr/index.html">FR</a>
+            <a href="../pt/index.html">PT</a>
+            <a href="../zh/index.html">ZH</a>
+        </div>
+    </div>
 </nav>
 
 <header>
-    <div style="display: inline-block; padding: 5px 15px; border-radius: 50px; background: rgba(0,245,212,0.1); color: var(--turquoise); font-weight: bold; font-size: 0.8em; margin-bottom: 20px; border: 1px solid var(--turquoise);">
-        🚀 LA APP QUE TRABAJA MIENTRAS TÚ TRABAJAS
-    </div>
-    <h1>AutoResponder Pro</h1>
-    <p class="hero-sub">Gana Dinero. Captura Clientes. Sin Tocar el Móvil.</p>
-    <p class="hero-desc">¿Cansado de perder presupuestos por no poder contestar al WhatsApp mientras estás con las manos en el tajo? Deja que el robot atienda a tus clientes por ti.</p>
-
-    <div style="margin-top: 40px;">
-        <a href="../app-release.apk" class="btn-download">DESCARGAR GRATIS (30 Mensajes)</a>
+    <div class="container">
+        <h1>Su asistente comercial en WhatsApp</h1>
+        <p class="hero-sub">No pierda ni un presupuesto más mientras trabaja. Automatice sus respuestas, capture datos de clientes y multiplique sus ventas sin tocar el teléfono.</p>
+        <a href="../app-release.apk" class="btn btn-primary">Descargar Gratis para Android</a>
+        <p style="font-size: 0.85em; color: var(--text-light); margin-top: 15px;">Incluye 30 mensajes de cortesía para su primera prueba.</p>
     </div>
 </header>
 
 <div class="container">
 
-    <section class="problem-section">
-        <h2>⚠️ El 80% de tus Clientes se pierden en 5 minutos</h2>
-        <p>Cuando un cliente escribe a un profesional, si no recibe respuesta rápida, <b>llama al siguiente de la lista en Google</b>. Estar ocupado trabajando te está costando cientos de euros cada mes en presupuestos perdidos.</p>
-    </section>
+    <section class="section-padding">
+        <div class="alert-box">
+            <h2>El problema: La respuesta lenta mata la venta</h2>
+            <p>En el sector servicios, el <b>80% de los clientes</b> contratan al primer profesional que les responde. Si usted está ocupado trabajando y tarda 1 hora en contestar, ese cliente ya ha llamado a su competencia. <b>AutoResponder Pro soluciona esto al instante.</b></p>
+        </div>
 
-    <section class="scenario-box">
-        <h2>Caso Real: El Fontanero Ocupado</h2>
-        <div class="scenario-steps">
-            <div class="step-card">
-                <span class="step-icon">🧼</span>
-                <p><b>Situación:</b> Estás arreglando una tubería. Tienes las manos mojadas o sucias.</p>
-            </div>
-            <div class="step-card active">
-                <span class="step-icon">💬</span>
-                <div class="whatsapp-msg">"Hola, ¿cuánto <b>cuesta</b> el <b>presupuesto</b> y cuándo puedes <b>venir</b>?"</div>
-                <p><b>Detección:</b> La app detecta las palabras clave al instante.</p>
-            </div>
-            <div class="step-card active">
-                <span class="step-icon">🤖</span>
-                <div class="bot-msg">"¡Hola! Te atiendo en breve. Mi precio base es 35€. Pásame foto de la avería..."</div>
-                <p><b>Acción:</b> El robot responde solo en 20 segundos. El cliente se queda contigo.</p>
-            </div>
-            <div class="step-card">
-                <span class="step-icon">✅</span>
-                <p><b>Resultado:</b> Cuando terminas, el cliente ya te ha mandado la foto. ¡Venta cerrada!</p>
-            </div>
-        </div>
-    </section>
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary);">Cómo funciona: Escenario Real</h2>
+            <p style="text-align: center; color: var(--text-light);">Imagine que es un fontanero realizando una reparación urgente...</p>
 
-    <h2 style="text-align: center; font-size: 2.5em; color: var(--turquoise);">Diseñada para tu Oficio</h2>
-    <div class="niche-grid">
-        <div class="niche-card">
-            <h3>🪚 Pulidores y Reformas</h3>
-            <p>Contesta mientras la máquina hace ruido. Que el cliente no se vaya a la competencia porque no oíste el móvil. Captura el número y llámale luego.</p>
-        </div>
-        <div class="niche-card">
-            <h3>⚡ Electricistas y Fontaneros</h3>
-            <p>Atiende urgencias mientras estás en otro aviso. El robot le da tu número directo o el de tu socio para no perder la avería de 24h.</p>
-        </div>
-        <div class="niche-card">
-            <h3>🚗 Talleres y Mecánicos</h3>
-            <p>Informa de precios base de revisiones o neumáticos mientras estás bajo el coche o manchado de grasa. Da imagen de profesionalidad extrema.</p>
-        </div>
-        <div class="niche-card">
-            <h3>💼 Comerciales e Inmobiliarias</h3>
-            <p>Responde al instante cuando preguntan por un piso o producto. El primero que contesta por WhatsApp, se lleva la visita y la comisión.</p>
-        </div>
-        <div class="niche-card">
-            <h3>✂️ Peluquerías y Estética</h3>
-            <p>Gestiona citas o dudas mientras estás con un cliente. Mantén tu agenda llena sin interrumpir tus servicios actuales.</p>
-        </div>
-        <div class="niche-card">
-            <h3>🚛 Transportes y Mudanzas</h3>
-            <p>Atiende solicitudes de presupuesto mientras conduces, cumpliendo con la seguridad vial y sin soltar el volante.</p>
-        </div>
-    </div>
-
-    <section style="background: var(--ocean-surface); padding: 50px; border-radius: 40px; text-align: center; border: 1px solid var(--glass);">
-        <h2 style="color: var(--mint);">¿Por qué AutoResponder Pro es diferente?</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 30px;">
-            <div>
-                <h4 style="color: var(--turquoise);">🛡️ Escudo de Ventas</h4>
-                <p style="font-size: 0.9em; opacity: 0.7;">Filtra solo a los que realmente quieren comprar usando tus palabras clave.</p>
-            </div>
-            <div>
-                <h4 style="color: var(--turquoise);">🕒 Simulación Humana</h4>
-                <p style="font-size: 0.9em; opacity: 0.7;">No responde al milisegundo como un bot tonto. Espera 20s para parecer natural.</p>
-            </div>
-            <div>
-                <h4 style="color: var(--turquoise);">📋 Agenda Automática</h4>
-                <p style="font-size: 0.9em; opacity: 0.7;">Guarda nombre y número de cada interesado. Tu base de datos crece sola.</p>
+            <div class="scenario-grid">
+                <div class="step">
+                    <div class="step-icon">1</div>
+                    <div class="msg msg-in">"Hola, ¿cuánto <b>cuesta</b> arreglar una fuga y cuándo puede <b>venir</b>?"</div>
+                    <p><b>El cliente pregunta.</b><br>Usted no puede tocar el móvil.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <p style="color: var(--success); font-weight: 700;">Detección Inteligente</p>
+                    <p>El robot detecta las palabras <i>"cuesta"</i> y <i>"venir"</i>.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <div class="msg msg-out">"Hola! Mi precio es 35€. Por favor, envíeme foto de la fuga y su dirección."</div>
+                    <p><b>Respuesta Automática.</b><br>Enviada en 20 segundos.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">4</div>
+                    <p style="font-weight: 700;">Venta Asegurada</p>
+                    <p>El cliente se siente atendido y le envía los datos. El trabajo es suyo.</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <div class="cta-container">
-        <h2 style="font-size: 2.2em;">Una sola venta recuperada paga la app 100 veces</h2>
-        <p style="opacity: 0.8; margin-bottom: 40px;">Pruébala ahora. Tienes 30 mensajes gratis para ver cómo entran los clientes.</p>
-        <a href="../app-release.apk" class="btn-download">DESCARGAR E INSTALAR APK</a>
-
-        <div style="margin-top: 50px; border-top: 1px solid var(--glass); padding-top: 40px;">
-            <p>¿Te gusta cómo funciona? <b>Apoya el desarrollo</b></p>
-            <p style="font-size: 1.8em; margin: 10px 0;">Aportación única: <span class="bizum-info">3.99€</span></p>
-            <p style="opacity: 0.7; font-size: 0.9em;">Bizum: <b>609 330 329</b><br>PayPal: <a href="https://www.paypal.me/appsaiber">paypal.me/appsaiber</a></p>
+    <section class="section-padding">
+        <h2 style="font-size: 2em; color: var(--primary); margin-bottom: 40px;">Soluciones para cada oficio</h2>
+        <div class="niche-grid">
+            <div class="niche-item">
+                <h3>🪚 Reformas y Pulidores</h3>
+                <p>Responda presupuestos mientras la maquinaria hace ruido. No deje que el ruido le haga perder un nuevo cliente.</p>
+            </div>
+            <div class="niche-item">
+                <h3>⚡ Electricistas y Fontaneros</h3>
+                <p>Atienda nuevas emergencias mientras está concentrado en un aviso. Filtre los trabajos urgentes de forma automática.</p>
+            </div>
+            <div class="niche-item">
+                <h3>🚗 Talleres Mecánicos</h3>
+                <p>Informe de sus tarifas base de mantenimiento mientras está bajo el vehículo o manchado de grasa.</p>
+            </div>
+            <div class="niche-item">
+                <h3>💼 Comerciales y Ventas</h3>
+                <p>Sea el primero en responder a un interesado en un producto. En las ventas, la velocidad es el factor número uno.</p>
+            </div>
+            <div class="niche-item">
+                <h3>✂️ Estética y Peluquerías</h3>
+                <p>Gestione solicitudes de citas y dudas frecuentes mientras atiende a sus clientes actuales.</p>
+            </div>
+            <div class="niche-item">
+                <h3>🚛 Transportes y Mudanzas</h3>
+                <p>Reciba solicitudes de presupuesto mientras conduce, cumpliendo con las normas de seguridad vial.</p>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <section class="section-padding" style="text-align: center; border-top: 1px solid var(--border);">
+        <h2 style="color: var(--primary);">Seguridad y Eficiencia Profesional</h2>
+        <p style="max-width: 700px; margin: 0 auto 40px; color: var(--text-light);">Nuestra aplicación está diseñada para ser una herramienta de trabajo robusta, no un juguete.</p>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;">
+            <div style="max-width: 250px;">
+                <h4 style="color: var(--accent);">Privacidad Total</h4>
+                <p style="font-size: 0.9em; color: var(--text-light);">Los mensajes se procesan solo en su teléfono. No guardamos sus conversaciones en ningún servidor.</p>
+            </div>
+            <div style="max-width: 250px;">
+                <h4 style="color: var(--accent);">Bajo Consumo</h4>
+                <p style="font-size: 0.9em; color: var(--text-light);">Algoritmo optimizado para no agotar su batería. Funciona en segundo plano de forma silenciosa.</p>
+            </div>
+            <div style="max-width: 250px;">
+                <h4 style="color: var(--accent);">Agenda de Clientes</h4>
+                <p style="font-size: 0.9em; color: var(--text-light);">Crea automáticamente una lista de interesados con su nombre y número para que pueda llamarles luego.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding" style="text-align: center;">
+        <h2 style="font-size: 2.2em; color: var(--primary);">Recupere el control de su tiempo</h2>
+        <p style="margin-bottom: 40px; color: var(--text-light);">Instale la aplicación hoy y deje que el robot trabaje por usted.</p>
+        <a href="../app-release.apk" class="btn btn-primary" style="font-size: 1.2em;">Descargar Instalador APK</a>
+        <p style="margin-top: 20px; font-weight: 600; color: var(--success);">Totalmente gratis para sus primeros 30 clientes.</p>
+    </section>
 
 </div>
 
 <footer>
-    <p>&copy; 2026 AutoResponder Pro. Desarrollado por Legendario Software. <a href="politica.html">Privacidad</a></p>
+    <div class="container">
+        <p>&copy; 2026 AutoResponder Pro. Desarrollado por Legendario Software.</p>
+        <p><a href="politica.html" style="color: var(--text-light);">Política de Privacidad y Términos</a></p>
+    </div>
 </footer>
 
 </body>

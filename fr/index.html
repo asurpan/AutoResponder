@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoResponder Pro - Vendez plus quand vos mains sont prises</title>
-    <meta name="description" content="Ne perdez plus un seul devis. Capturez automatiquement des clients sur WhatsApp pendant que vous travaillez. L'assistant ultime pour les indépendants.">
+    <title>AutoResponder Pro - Automatisation WhatsApp pour Professionnels</title>
+    <meta name="description" content="Gagnez du temps et capturez des prospects automatiquement. L'outil de réponse intelligent pour les indépendants et les services techniques.">
 
-    <!-- SEO International / Hreflang -->
+    <!-- SEO International -->
     <link rel="alternate" hreflang="es" href="https://asurpan.github.io/AutoResponder/es/index.html" />
     <link rel="alternate" hreflang="en" href="https://asurpan.github.io/AutoResponder/en/index.html" />
     <link rel="alternate" hreflang="fr" href="https://asurpan.github.io/AutoResponder/fr/index.html" />
@@ -15,280 +15,253 @@
     <link rel="alternate" hreflang="x-default" href="https://asurpan.github.io/AutoResponder/es/index.html" />
     <link rel="canonical" href="https://asurpan.github.io/AutoResponder/fr/index.html" />
 
-    <!-- Meta Tags Globales -->
-    <meta name="geo.region" content="FR;BE;CH;CA;MA" />
-    <meta name="robots" content="index, follow">
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ocean-deep: #000B18;
-            --ocean-surface: #001F33;
-            --turquoise: #00F5D4;
-            --mint: #20FF8C;
-            --glass: rgba(255, 255, 255, 0.05);
-            --danger: #FF4B4B;
+            --primary: #1a365d;
+            --accent: #2b6cb0;
+            --success: #38a169;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --border: #e2e8f0;
         }
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
-            color: #fff;
+            color: var(--text-dark);
             margin: 0;
             padding: 0;
-            background-color: var(--ocean-deep);
+            background-color: #fff;
         }
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
-        /* NAV & LANG SELECTOR */
         nav {
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            padding: 10px 20px;
+            background: #fff;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--glass);
-            display: flex;
-            justify-content: center;
-            gap: 15px;
+            z-index: 1000;
         }
-        .lang-link {
-            text-decoration: none;
-            font-size: 0.8em;
-            color: #fff;
-            opacity: 0.6;
-            transition: opacity 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .lang-link:hover, .lang-link.active { opacity: 1; color: var(--turquoise); }
+        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 700; color: var(--primary); font-size: 1.2em; text-decoration: none; }
+        .lang-selector { display: flex; gap: 12px; }
+        .lang-selector a { text-decoration: none; font-size: 0.85em; color: var(--text-light); font-weight: 600; }
+        .lang-selector a.active { color: var(--accent); }
 
-        /* HEADER & HERO */
         header {
+            padding: 80px 0;
+            background-color: var(--bg-light);
             text-align: center;
-            padding: 80px 20px;
-            background: radial-gradient(circle at center, var(--ocean-surface), var(--ocean-deep));
-            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         h1 {
-            font-size: 3.5em;
-            font-weight: 800;
+            font-size: 3em;
+            color: var(--primary);
             margin: 0;
-            line-height: 1.1;
-            background: linear-gradient(to right, var(--turquoise), var(--mint));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .hero-sub { font-size: 1.4em; opacity: 0.9; margin-top: 20px; font-weight: 600; color: var(--mint); }
-        .hero-desc { max-width: 700px; margin: 20px auto; opacity: 0.7; font-size: 1.1em; }
-
-        /* SECTION PROBLÈME */
-        .problem-section {
-            background: rgba(255, 75, 75, 0.05);
-            border: 1px solid rgba(255, 75, 75, 0.2);
-            padding: 40px;
-            border-radius: 30px;
-            text-align: center;
-            margin: 40px 0;
-        }
-        .problem-section h2 { color: var(--danger); margin-top: 0; }
-
-        /* SCÉNARIO RÉEL */
-        .scenario-box {
-            background: var(--ocean-surface);
-            border-radius: 30px;
-            padding: 40px;
-            margin: 60px 0;
-            border: 1px solid var(--glass);
-        }
-        .scenario-box h2 { text-align: center; color: var(--turquoise); margin-bottom: 40px; }
-        .scenario-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .step-card {
-            background: var(--glass);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid transparent;
-        }
-        .step-card.active { border-color: var(--turquoise); background: rgba(0, 245, 212, 0.05); }
-        .step-icon { font-size: 2em; margin-bottom: 10px; display: block; }
-        .whatsapp-msg {
-            background: #25D366;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 15px 15px 15px 0;
-            font-size: 0.85em;
-            text-align: left;
-            margin: 10px 0;
-            display: inline-block;
-        }
-        .bot-msg {
-            background: #34B7F1;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 15px 15px 0 15px;
-            font-size: 0.85em;
-            text-align: left;
-            margin: 10px 0;
-            display: inline-block;
-        }
-
-        /* NICHES */
-        .niche-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin: 60px 0; }
-        .niche-card {
-            background: var(--glass);
-            padding: 30px;
-            border-radius: 25px;
-            transition: all 0.3s;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .niche-card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.08); border-color: var(--turquoise); }
-        .niche-card h3 { color: var(--mint); margin-top: 0; display: flex; align-items: center; gap: 10px; }
-
-        /* BOUTONS */
-        .cta-container { text-align: center; padding: 60px 20px; }
-        .btn-download {
-            display: inline-flex;
-            align-items: center;
-            background: var(--turquoise);
-            color: var(--ocean-deep);
-            padding: 20px 50px;
-            text-decoration: none;
-            border-radius: 20px;
             font-weight: 800;
-            font-size: 1.3em;
-            transition: all 0.3s;
-            box-shadow: 0 10px 30px rgba(0,245,212,0.3);
+            letter-spacing: -0.02em;
         }
-        .btn-download:hover { transform: scale(1.05); box-shadow: 0 15px 40px var(--turquoise); }
+        .hero-sub {
+            font-size: 1.25em;
+            color: var(--text-light);
+            max-width: 800px;
+            margin: 20px auto;
+        }
 
-        /* FOOTER */
-        footer { text-align: center; padding: 60px; opacity: 0.5; border-top: 1px solid var(--glass); }
-        .bizum-info { color: var(--mint); font-weight: bold; }
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover { background-color: var(--accent); transform: translateY(-1px); }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 2.2em; }
-            .scenario-steps { grid-template-columns: 1fr; }
+        .section-padding { padding: 80px 0; }
+        .alert-box {
+            background-color: #fffaf0;
+            border-left: 4px solid #ed8936;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        .alert-box h2 { color: #c05621; margin-top: 0; font-size: 1.5em; }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+        }
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+        .step { text-align: center; }
+        .step-icon { font-size: 1.5em; background: var(--bg-light); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto 15px; color: var(--accent); }
+
+        .msg { padding: 12px 16px; border-radius: 12px; font-size: 0.9em; margin-bottom: 10px; max-width: 90%; }
+        .msg-in { background: #edf2f7; align-self: flex-start; }
+        .msg-out { background: #ebf8ff; border: 1px solid #bee3f8; margin-left: auto; }
+
+        .niche-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .niche-item h3 { color: var(--primary); margin-top: 0; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
+        .niche-item p { color: var(--text-light); font-size: 0.95em; }
+
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .section-padding { padding: 50px 0; }
         }
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="../es/index.html" class="lang-link">🇪🇸 ES</a>
-    <a href="../en/index.html" class="lang-link">🇺🇸 EN</a>
-    <a href="../fr/index.html" class="lang-link active">🇫🇷 FR</a>
-    <a href="../pt/index.html" class="lang-link">🇧🇷 PT</a>
-    <a href="../zh/index.html" class="lang-link">🇨🇳 ZH</a>
+    <div class="container nav-flex">
+        <a href="#" class="logo">AutoResponder Pro</a>
+        <div class="lang-selector">
+            <a href="../es/index.html">ES</a>
+            <a href="../en/index.html">EN</a>
+            <a href="../fr/index.html" class="active">FR</a>
+            <a href="../pt/index.html">PT</a>
+            <a href="../zh/index.html">ZH</a>
+        </div>
+    </div>
 </nav>
 
 <header>
-    <div style="display: inline-block; padding: 5px 15px; border-radius: 50px; background: rgba(0,245,212,0.1); color: var(--turquoise); font-weight: bold; font-size: 0.8em; margin-bottom: 20px; border: 1px solid var(--turquoise);">
-        🚀 L'APP QUI TRAVAILLE PENDANT QUE VOUS TRAVAILLEZ
-    </div>
-    <h1>AutoResponder Pro</h1>
-    <p class="hero-sub">Gagnez de l'argent. Capturez des clients. Sans toucher votre téléphone.</p>
-    <p class="hero-desc">Fatigué de perdre des devis parce que vous ne pouvez pas répondre sur WhatsApp pendant que vous travaillez ? Laissez le robot s'occuper de vos clients pour vous.</p>
-
-    <div style="margin-top: 40px;">
-        <a href="../app-release.apk" class="btn-download">TÉLÉCHARGER GRATUITEMENT (30 Messages)</a>
+    <div class="container">
+        <h1>Votre Assistant de Vente WhatsApp</h1>
+        <p class="hero-sub">Ne perdez plus jamais un devis pendant que vous travaillez. Automatisez vos réponses, capturez les données clients et multipliez vos ventes sans toucher à votre téléphone.</p>
+        <a href="../app-release.apk" class="btn btn-primary">Télécharger Gratuitement pour Android</a>
+        <p style="font-size: 0.85em; color: var(--text-light); margin-top: 15px;">Comprend 30 messages de courtoisie pour votre premier essai.</p>
     </div>
 </header>
 
 <div class="container">
 
-    <section class="problem-section">
-        <h2>⚠️ 80 % de vos clients sont perdus en 5 minutes</h2>
-        <p>Lorsqu'un client écrit à un professionnel, s'il ne reçoit pas de réponse rapide, <b>il appelle le suivant sur la liste Google</b>. Être occupé au travail vous coûte des centaines d'euros chaque mois en devis perdus.</p>
-    </section>
+    <section class="section-padding">
+        <div class="alert-box">
+            <h2>Le problème : Une réponse lente tue la vente</h2>
+            <p>Dans le secteur des services, <b>80 % des clients</b> embauchent le premier professionnel qui répond. Si vous êtes occupé et mettez une heure à répondre, ce client a déjà appelé votre concurrence. <b>AutoResponder Pro résout cela instantanément.</b></p>
+        </div>
 
-    <section class="scenario-box">
-        <h2>Cas Réel : Le Plombier Occupé</h2>
-        <div class="scenario-steps">
-            <div class="step-card">
-                <span class="step-icon">🧼</span>
-                <p><b>Situation :</b> Vous réparez un tuyau. Vos mains sont mouillées ou sales.</p>
-            </div>
-            <div class="step-card active">
-                <span class="step-icon">💬</span>
-                <div class="whatsapp-msg">"Bonjour, quel est le <b>prix</b> du <b>devis</b> et quand pouvez-vous <b>venir</b> ?"</div>
-                <p><b>Détection :</b> L'application détecte instantanément les mots-clés.</p>
-            </div>
-            <div class="step-card active">
-                <span class="step-icon">🤖</span>
-                <div class="bot-msg">"Bonjour ! Je m'occupe de vous sous peu. Mon prix de base est de 35€. Envoyez-moi une photo..."</div>
-                <p><b>Action :</b> Le robot répond tout seul en 20 secondes. Le client reste avec vous.</p>
-            </div>
-            <div class="step-card">
-                <span class="step-icon">✅</span>
-                <p><b>Résultat :</b> Quand vous avez fini, le client a déjà envoyé la photo. Vente conclue !</p>
-            </div>
-        </div>
-    </section>
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary);">Comment ça marche : Scénario Réel</h2>
+            <p style="text-align: center; color: var(--text-light);">Imaginez que vous êtes un plombier effectuant une réparation urgente...</p>
 
-    <h2 style="text-align: center; font-size: 2.5em; color: var(--turquoise);">Conçue pour votre métier</h2>
-    <div class="niche-grid">
-        <div class="niche-card">
-            <h3>🪚 Ponçage & Rénovations</h3>
-            <p>Répondez quand la machine fait du bruit. Ne laissez pas le client aller à la concurrence parce que vous n'avez pas entendu votre téléphone.</p>
-        </div>
-        <div class="niche-card">
-            <h3>⚡ Électriciens & Plombiers</h3>
-            <p>Gérez les urgences pendant que vous êtes sur une autre intervention. Le robot leur donne votre numéro direct ou celui de votre associé.</p>
-        </div>
-        <div class="niche-card">
-            <h3>🚗 Garages & Mécaniciens</h3>
-            <p>Informez sur les prix de base des révisions ou pneus pendant que vous êtes sous la voiture. Donnez une image de professionnalisme extrême.</p>
-        </div>
-        <div class="niche-card">
-            <h3>💼 Commerciaux & Immobilier</h3>
-            <p>Répondez instantanément quand on vous pose des questions sur un produit. Le premier qui répond sur WhatsApp remporte la vente.</p>
-        </div>
-        <div class="niche-card">
-            <h3>✂️ Coiffure & Esthétique</h3>
-            <p>Gérez les rendez-vous ou questions pendant que vous êtes avec une cliente. Gardez votre agenda plein sans interruption.</p>
-        </div>
-        <div class="niche-card">
-            <h3>🚛 Transport & Déménagement</h3>
-            <p>Répondez aux demandes de devis pendant que vous conduisez, en respectant la sécurité routière et sans lâcher le volant.</p>
-        </div>
-    </div>
-
-    <section style="background: var(--ocean-surface); padding: 50px; border-radius: 40px; text-align: center; border: 1px solid var(--glass);">
-        <h2 style="color: var(--mint);">Pourquoi AutoResponder Pro est différent ?</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 30px;">
-            <div>
-                <h4 style="color: var(--turquoise);">🛡️ Bouclier de Vente</h4>
-                <p style="font-size: 0.9em; opacity: 0.7;">Filtrez uniquement ceux qui veulent vraiment acheter grâce à vos mots-clés.</p>
-            </div>
-            <div>
-                <h4 style="color: var(--turquoise);">🕒 Simulation Humaine</h4>
-                <p style="font-size: 0.9em; opacity: 0.7;">Ne répond pas en une milliseconde. Attend 20s pour paraître naturel.</p>
-            </div>
-            <div>
-                <h4 style="color: var(--turquoise);">📋 Agenda Automatique</h4>
-                <p style="font-size: 0.9em; opacity: 0.7;">Enregistre le nom et le numéro de chaque prospect. Votre base de données grandit seule.</p>
+            <div class="scenario-grid">
+                <div class="step">
+                    <div class="step-icon">1</div>
+                    <div class="msg msg-in">"Bonjour, quel est le <b>prix</b> du devis et quand pouvez-vous <b>venir</b> ?"</div>
+                    <p><b>Le client demande.</b><br>Vous ne pouvez pas toucher votre téléphone.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <p style="color: var(--success); font-weight: 700;">Détection Intelligente</p>
+                    <p>Le robot détecte les mots <i>"prix"</i> et <i>"venir"</i>.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <div class="msg msg-out">"Bonjour ! Mon prix commence à 35€. Veuillez m'envoyer une photo du problème."</div>
+                    <p><b>Réponse Automatique.</b><br>Envoyée en 20 secondes.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">4</div>
+                    <p style="font-weight: 700;">Vente Sécurisée</p>
+                    <p>Le client se sent pris en charge et envoie les données. Le travail est à vous.</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <div class="cta-container">
-        <h2 style="font-size: 2.2em;">Une seule vente récupérée paie l'app 100 fois</h2>
-        <p style="opacity: 0.8; margin-bottom: 40px;">Essayez-la maintenant. Vous avez 30 messages gratuits pour voir les clients arriver.</p>
-        <a href="../app-release.apk" class="btn-download">TÉLÉCHARGER ET INSTALLER L'APK</a>
-
-        <div style="margin-top: 50px; border-top: 1px solid var(--glass); padding-top: 40px;">
-            <p>Vous aimez le fonctionnement ? <b>Soutenez le développement</b></p>
-            <p style="font-size: 1.8em; margin: 10px 0;">Don unique : <span class="bizum-info">3.99€</span></p>
-            <p style="opacity: 0.7; font-size: 0.9em;">PayPal: <a href="https://www.paypal.me/appsaiber">paypal.me/appsaiber</a></p>
+    <section class="section-padding">
+        <h2 style="font-size: 2em; color: var(--primary); margin-bottom: 40px;">Des solutions pour chaque métier</h2>
+        <div class="niche-grid">
+            <div class="niche-item">
+                <h3>🪚 Rénovation & Ponçage</h3>
+                <p>Répondez aux devis même quand vos machines font du bruit. Ne laissez pas le bruit vous faire perdre un client.</p>
+            </div>
+            <div class="niche-item">
+                <h3>⚡ Électriciens & Plombiers</h3>
+                <p>Gérez les nouvelles urgences pendant que vous êtes en intervention. Filtrez les appels automatiquement.</p>
+            </div>
+            <div class="niche-item">
+                <h3>🚗 Garages & Mécaniciens</h3>
+                <p>Informez sur vos tarifs de base pendant que vous êtes sous le véhicule ou que vous avez les mains sales.</p>
+            </div>
+            <div class="niche-item">
+                <h3>💼 Commerciaux & Ventes</h3>
+                <p>Soyez le premier à répondre à un prospect. En vente, la vitesse est le facteur numéro un.</p>
+            </div>
+            <div class="niche-item">
+                <h3>✂️ Coiffure & Esthétique</h3>
+                <p>Gérez les demandes de rendez-vous tout en servant vos clients actuels.</p>
+            </div>
+            <div class="niche-item">
+                <h3>🚛 Transport & Déménagement</h3>
+                <p>Recevez des demandes de devis tout en conduisant, en respectant la sécurité routière.</p>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <section class="section-padding" style="text-align: center; border-top: 1px solid var(--border);">
+        <h2 style="color: var(--primary);">Sécurité et Efficacité Professionnelle</h2>
+        <p style="max-width: 700px; margin: 0 auto 40px; color: var(--text-light);">Notre application est conçue pour être un outil de travail robuste.</p>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;">
+            <div style="max-width: 250px;">
+                <h4 style="color: var(--accent);">Confidentialité Totale</h4>
+                <p style="font-size: 0.9em; color: var(--text-light);">Les messages sont traités uniquement sur votre téléphone. Aucune donnée sur nos serveurs.</p>
+            </div>
+            <div style="max-width: 250px;">
+                <h4 style="color: var(--accent);">Basse Consommation</h4>
+                <p style="font-size: 0.9em; color: var(--text-light);">Algorithme optimisé pour ne pas vider votre batterie. Fonctionne en arrière-plan.</p>
+            </div>
+            <div style="max-width: 250px;">
+                <h4 style="color: var(--accent);">Agenda Clients</h4>
+                <p style="font-size: 0.9em; color: var(--text-light);">Crée automatiquement une liste de prospects avec leur nom et numéro.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding" style="text-align: center;">
+        <h2 style="font-size: 2.2em; color: var(--primary);">Reprenez le contrôle de votre temps</h2>
+        <p style="margin-bottom: 40px; color: var(--text-light);">Installez l'application aujourd'hui et laissez le robot travailler pour vous.</p>
+        <a href="../app-release.apk" class="btn btn-primary" style="font-size: 1.2em;">Télécharger l'APK</a>
+        <p style="margin-top: 20px; font-weight: 600; color: var(--success);">Totalement gratuit pour vos 30 premiers clients.</p>
+    </section>
 
 </div>
 
 <footer>
-    <p>&copy; 2026 AutoResponder Pro. Développé par Legendario Software. <a href="politica.html">Confidentialité</a></p>
+    <div class="container">
+        <p>&copy; 2026 AutoResponder Pro. Développé par Legendario Software.</p>
+        <p><a href="politica.html" style="color: var(--text-light);">Politique de Confidentialité</a></p>
+    </div>
 </footer>
 
 </body>
