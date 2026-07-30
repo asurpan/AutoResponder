@@ -1,4 +1,4 @@
-/* Copyright (c) 2026 AutoResponder Pro / Legendario Software. Todos los derechos reservados. */
+/* Copyright (c) 2026 AutoResponder Pro / Lorensoft. Todos los derechos reservados. */
 package com.sagon.legendario
 
 import android.content.ComponentName
@@ -887,7 +887,7 @@ private fun verifyActivationCode(androidId: String, code: String): Boolean {
 
 private fun generateActivationCode(androidId: String): String {
     try {
-        val salt = "LEGENDARIO_PRO_2026_SALT"
+        val salt = "LORENSOFT_PRO_2026_SALT"
         val input = androidId + salt
         val digest = MessageDigest.getInstance("SHA-256")
         val hash = digest.digest(input.toByteArray())

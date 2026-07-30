@@ -1,6 +1,6 @@
 # LICENCIA DE USO Y CONTRIBUCIÓN VOLUNTARIA - AutoResponder Pro
 
-Copyright (c) 2026 AutoResponder Pro / Legendario Software. Todos los derechos reservados.
+Copyright (c) 2026 AutoResponder Pro / Lorensoft. Todos los derechos reservados.
 
 ## 1. SOBRE EL SOFTWARE
 AutoResponder Pro (en adelante, "el Software") es una herramienta de productividad independiente desarrollada para la automatización local de respuestas en dispositivos Android.
