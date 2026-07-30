@@ -6,6 +6,19 @@
     <title>AutoResponder Pro - Sell more while your hands are busy</title>
     <meta name="description" content="Don't lose another quote. Automatically capture leads on WhatsApp while you work. The ultimate assistant for freelancers and professionals.">
 
+    <!-- International SEO / Hreflang -->
+    <link rel="alternate" hreflang="es" href="https://asurpan.github.io/AutoResponder/es/index.html" />
+    <link rel="alternate" hreflang="en" href="https://asurpan.github.io/AutoResponder/en/index.html" />
+    <link rel="alternate" hreflang="fr" href="https://asurpan.github.io/AutoResponder/fr/index.html" />
+    <link rel="alternate" hreflang="pt" href="https://asurpan.github.io/AutoResponder/pt/index.html" />
+    <link rel="alternate" hreflang="zh" href="https://asurpan.github.io/AutoResponder/zh/index.html" />
+    <link rel="alternate" hreflang="x-default" href="https://asurpan.github.io/AutoResponder/es/index.html" />
+    <link rel="canonical" href="https://asurpan.github.io/AutoResponder/en/index.html" />
+
+    <!-- Global Meta Tags -->
+    <meta name="geo.region" content="US;GB;CA;AU;IN" />
+    <meta name="robots" content="index, follow">
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -26,10 +39,35 @@
         }
         .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
 
+        /* NAV & LANG SELECTOR */
+        nav {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--glass);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .lang-link {
+            text-decoration: none;
+            font-size: 0.8em;
+            color: #fff;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .lang-link:hover, .lang-link.active { opacity: 1; color: var(--turquoise); }
+
         /* HEADER & HERO */
         header {
             text-align: center;
-            padding: 100px 20px;
+            padding: 80px 20px;
             background: radial-gradient(circle at center, var(--ocean-surface), var(--ocean-deep));
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
@@ -96,7 +134,7 @@
             display: inline-block;
         }
 
-        /* NICHES */
+        /* NICHOS */
         .niche-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin: 60px 0; }
         .niche-card {
             background: var(--glass);
@@ -136,6 +174,14 @@
     </style>
 </head>
 <body>
+
+<nav>
+    <a href="../es/index.html" class="lang-link">🇪🇸 ES</a>
+    <a href="../en/index.html" class="lang-link active">🇺🇸 EN</a>
+    <a href="../fr/index.html" class="lang-link">🇫🇷 FR</a>
+    <a href="../pt/index.html" class="lang-link">🇧🇷 PT</a>
+    <a href="../zh/index.html" class="lang-link">🇨🇳 ZH</a>
+</nav>
 
 <header>
     <div style="display: inline-block; padding: 5px 15px; border-radius: 50px; background: rgba(0,245,212,0.1); color: var(--turquoise); font-weight: bold; font-size: 0.8em; margin-bottom: 20px; border: 1px solid var(--turquoise);">
