@@ -122,6 +122,25 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    fun shareLead(context: Context, entry: String) {
+        val parts = entry.split(" | ")
+        val name = parts.getOrNull(0) ?: "Cliente"
+        val phone = parts.getOrNull(1) ?: ""
+        val message = parts.getOrNull(3) ?: ""
+        
+        val shareText = "📄 *CLIENTE CAPTURADO POR ASISTENTE*\n\n" +
+                "👤 *Nombre:* $name\n" +
+                "📱 *Teléfono:* $phone\n" +
+                "💬 *Consulta:* $message\n\n" +
+                "_Enviado desde AutoResponder Pro_"
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, shareText)
+        }
+        context.startActivity(Intent.createChooser(intent, "Compartir Lead"))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -158,11 +177,13 @@ class MainActivity : ComponentActivity() {
     fun playActivationSound() {
         try {
             val tg = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
-            tg.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+            tg.startTone(ToneGenerator.TONE_PROP_BEEP, 150)
             Thread {
                 try {
-                    Thread.sleep(300)
-                    tg.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+                    Thread.sleep(250)
+                    tg.startTone(ToneGenerator.TONE_PROP_BEEP, 150)
+                    Thread.sleep(250)
+                    tg.startTone(ToneGenerator.TONE_DTMF_D, 200) // Tono más agudo tipo "BIP" final
                     Thread.sleep(500)
                     tg.release()
                 } catch (e: Exception) {
@@ -298,20 +319,24 @@ fun MainScreen(activity: MainActivity) {
 
     val defaultKeywords = "presupuesto, averia, reparacion, urgente, mantenimiento, cuanto, precio, servicio, instalacion, arreglar"
     var keywords by remember { mutableStateOf(prefs.getString("keywords", defaultKeywords) ?: defaultKeywords) }
-    var techNumber by remember { mutableStateOf(prefs.getString("tech_number", "600000000") ?: "600000000") }
     var blacklist by remember { mutableStateOf(prefs.getString("blacklist", "") ?: "") }
     var promoLink by remember { mutableStateOf(prefs.getString("promo_link", "") ?: "") }
+    var promoLinkVip by remember { mutableStateOf(prefs.getString("promo_link_vip", "") ?: "") }
     var repetitionDelay by remember { mutableIntStateOf(prefs.getInt("repetition_delay", 24)) }
     var vipList by remember { mutableStateOf(prefs.getString("vip_list", "") ?: "") }
     
-    val defaultDayMsg = "¡Buenas! Soy tu fontanero de confianza. Ahora mismo estoy trabajando y no puedo atenderte bien por aquí. Escríbeme porfa a mi número personal {numero} y dime que quieres el DESCUENTO DEL MES. Así te paso un presupuesto rápido. ¡En cuanto pare un segundo te escribo!"
-    val defaultNightMsg = "¡Buenas! Soy tu fontanero de confianza. Ya he terminado por hoy. Para dejarte el presupuesto listo para mañana a primera hora, escríbeme porfa a mi número personal {numero} mencionando el DESCUENTO DEL MES. ¡Mañana a primera hora te paso el precio con la oferta aplicada sin falta! ¡Gracias!"
+    val defaultDayMsg = "¡Buenas! Soy tu fontanero de confianza. Ahora mismo estoy trabajando y no puedo atenderte bien por aquí. Escríbeme porfa a mi número personal 600 000 000 y dime que quieres el DESCUENTO DEL MES. Así te paso un presupuesto rápido. ¡En cuanto pare un segundo te escribo!"
+    val defaultNightMsg = "¡Buenas! Soy tu fontanero de confianza. Ya he terminado por hoy. Para dejarte el presupuesto listo para mañana a primera hora, escríbeme porfa a mi número personal 600 000 000 mencionando el DESCUENTO DEL MES. ¡Mañana a primera hora te paso el precio con la oferta aplicada sin falta! ¡Gracias!"
     
     var msgDay by remember { mutableStateOf(prefs.getString("msg_day", defaultDayMsg) ?: defaultDayMsg) }
     var msgNight by remember { mutableStateOf(prefs.getString("msg_night", defaultNightMsg) ?: defaultNightMsg) }
     
     val defaultVipMsg = "¡Hola! He recibido tu mensaje. Como eres un contacto VIP, te respondo automáticamente aunque no hayas usado palabras clave (solo cuando tengo la pantalla apagada). ¡En cuanto pueda te escribo!"
     var msgVip by remember { mutableStateOf(prefs.getString("msg_vip", defaultVipMsg) ?: defaultVipMsg) }
+
+    // --- ESTADOS DE GESTIÓN DE CLIENTES ---
+    var selectedFilter by rememberSaveable { mutableStateOf("TODOS") }
+    var showDeleteAllDialog by remember { mutableStateOf(false) }
 
     var startHourMonSat by remember { mutableIntStateOf(prefs.getInt("start_hour_mon_sat", 8)) }
     var endHourMonSat by remember { mutableIntStateOf(prefs.getInt("end_hour_mon_sat", 22)) }
@@ -326,7 +351,7 @@ fun MainScreen(activity: MainActivity) {
     var userExpandedSettings by remember { mutableStateOf<Boolean?>(null) }
     val isSettingsExpanded = userExpandedSettings ?: !allPermsOk
 
-    val isAssistantComplete = keywords.isNotBlank() && techNumber.isNotBlank() && msgDay.isNotBlank() && msgNight.isNotBlank()
+    val isAssistantComplete = keywords.isNotBlank() && msgDay.isNotBlank() && msgNight.isNotBlank()
     var userExpandedAssistant by remember { mutableStateOf<Boolean?>(null) }
     val isAssistantExpanded = userExpandedAssistant ?: !isAssistantComplete
 
@@ -435,29 +460,12 @@ fun MainScreen(activity: MainActivity) {
                     AssistantConfigPanel(
                         keywords = keywords,
                         onKeywordsChange = { keywords = it; prefs.edit().putString("keywords", it).apply() },
-                        techNumber = techNumber,
-                        onTechNumberChange = { techNumber = it; prefs.edit().putString("tech_number", it).apply() },
-                        onPickTechNumber = {
-                            if (hasContactsPerm) {
-                                activity.pickContact { picked ->
-                                    // Limpiar el número de caracteres extra
-                                    val clean = picked.replace(Regex("[\\s\\-()]"), "")
-                                    var finalNum = clean
-                                    // Normalizar prefijo español si existe para dejar solo 9 cifras si es móvil
-                                    if (finalNum.startsWith("+34")) finalNum = finalNum.substring(3)
-                                    else if (finalNum.startsWith("34") && finalNum.length == 11) finalNum = finalNum.substring(2)
-                                    
-                                    techNumber = finalNum
-                                    prefs.edit().putString("tech_number", finalNum).apply()
-                                }
-                            } else {
-                                activity.requestContactsPermission()
-                            }
-                        },
                         blacklist = blacklist,
                         onBlacklistChange = { blacklist = it; prefs.edit().putString("blacklist", it).apply() },
                         promoLink = promoLink,
                         onPromoLinkChange = { promoLink = it; prefs.edit().putString("promo_link", it).apply() },
+                        promoLinkVip = promoLinkVip,
+                        onPromoLinkVipChange = { promoLinkVip = it; prefs.edit().putString("promo_link_vip", it).apply() },
                         repetitionDelay = repetitionDelay,
                         onRepetitionDelayChange = { repetitionDelay = it; prefs.edit().putInt("repetition_delay", it).apply() },
                         vipList = vipList,
@@ -465,8 +473,18 @@ fun MainScreen(activity: MainActivity) {
                         onPickContact = { isForVip ->
                             if (hasContactsPerm) {
                                 activity.pickContact { pickedName ->
-                                    val current = if (isForVip) vipList.trim() else blacklist.trim()
-                                    val newList = if (current.isEmpty()) pickedName else "$current, $pickedName"
+                                    val current = if (isForVip) vipList else blacklist
+                                    val items = current.split(",")
+                                        .map { it.trim() }
+                                        .filter { it.isNotEmpty() }
+                                        .toMutableList()
+                                    
+                                    if (!items.contains(pickedName)) {
+                                        items.add(pickedName)
+                                    }
+                                    
+                                    val newList = items.joinToString(", ")
+                                    
                                     if (isForVip) {
                                         vipList = newList
                                         prefs.edit().putString("vip_list", newList).apply()
@@ -509,18 +527,63 @@ fun MainScreen(activity: MainActivity) {
             }
 
             item {
-                Text(text = "CLIENTES DETECTADOS", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = 8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "CLIENTES DETECTADOS",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        letterSpacing = 1.sp
+                    )
+                    if (history.isNotBlank()) {
+                        TextButton(onClick = { showDeleteAllDialog = true }) {
+                            Icon(Icons.Default.DeleteSweep, null, tint = Color(0xFFFF4B4B), modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("LIMPIAR", color = Color(0xFFFF4B4B), fontSize = 11.sp)
+                        }
+                    }
+                }
+
+                if (history.isNotBlank()) {
+                    FilterSection(selected = selectedFilter, onSelect = { selectedFilter = it })
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                
                 val leadEntries = history.split("\n").filter { it.isNotBlank() }
-                if (leadEntries.isEmpty()) {
+                val filteredLeads = when (selectedFilter) {
+                    "HOY" -> {
+                        val today = java.text.SimpleDateFormat("dd/MM", java.util.Locale.getDefault()).format(java.util.Date())
+                        leadEntries.filter { it.contains(today) }
+                    }
+                    "VIP" -> leadEntries.filter { it.endsWith("VIP") }
+                    else -> leadEntries
+                }
+
+                if (filteredLeads.isEmpty()) {
                     Column(modifier = Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Inbox, null, tint = Color.White.copy(alpha = 0.1f), modifier = Modifier.size(48.dp))
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("No hay clientes detectados aún", color = Color.White.copy(alpha = 0.2f), fontSize = 13.sp)
+                        Text(
+                            text = if (selectedFilter == "TODOS") "No hay clientes detectados aún" else "No hay clientes que coincidan",
+                            color = Color.White.copy(alpha = 0.2f),
+                            fontSize = 13.sp
+                        )
                     }
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        leadEntries.reversed().forEachIndexed { index, entry ->
-                            LeadPremiumCard(entry = entry, onClick = { selectedLeadEntry = entry }, onDelete = { leadIndexToDelete = leadEntries.size - 1 - index })
+                        filteredLeads.reversed().forEach { entry ->
+                            // Encontrar el índice original para borrar correctamente
+                            val originalIndex = leadEntries.indexOf(entry)
+                            LeadPremiumCard(
+                                entry = entry, 
+                                onClick = { selectedLeadEntry = entry }, 
+                                onDelete = { leadIndexToDelete = originalIndex },
+                                onShare = { activity.shareLead(context, entry) }
+                            )
                         }
                     }
                 }
@@ -529,16 +592,48 @@ fun MainScreen(activity: MainActivity) {
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "AutoResponder Pro v3.1", color = Color.White.copy(alpha = 0.3f), fontSize = 11.sp)
-                    TextButton(onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://asurpan.github.io/AutoResponder/es/politica.html"))
-                        context.startActivity(intent)
-                    }) {
-                        Text("Política de Privacidad y Términos Legales", color = TurquoiseNeon.copy(alpha = 0.6f), fontSize = 12.sp, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://asurpan.github.io/AutoResponder/es/index.html"))
+                            context.startActivity(intent)
+                        }) {
+                            Text("Sitio Web Oficial", color = TurquoiseNeon.copy(alpha = 0.6f), fontSize = 12.sp, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)
+                        }
+                        Text(" • ", color = Color.White.copy(alpha = 0.2f))
+                        TextButton(onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://asurpan.github.io/AutoResponder/es/politica.html"))
+                            context.startActivity(intent)
+                        }) {
+                            Text("Privacidad y Legal", color = TurquoiseNeon.copy(alpha = 0.6f), fontSize = 12.sp, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)
+                        }
                     }
+
                     Text("© 2026 Lorensoft. Todos los derechos reservados.", color = Color.White.copy(alpha = 0.2f), fontSize = 10.sp)
                 }
             }
         }
+    }
+
+    if (showDeleteAllDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAllDialog = false },
+            containerColor = OceanSurface,
+            shape = RoundedCornerShape(28.dp),
+            title = { Text("Vaciar Historial", color = Color.White, fontWeight = FontWeight.Bold) },
+            text = { Text("¿Quieres eliminar todos los registros de clientes? Esta acción no se puede deshacer.", color = Color.White.copy(alpha = 0.7f)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        history = ""
+                        prefs.edit().putString("leads_history", "").apply()
+                        showDeleteAllDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF4B4B), contentColor = Color.White)
+                ) { Text("VACIAR TODO") }
+            },
+            dismissButton = { TextButton(onClick = { showDeleteAllDialog = false }) { Text("CANCELAR", color = Color.White.copy(alpha = 0.5f)) } }
+        )
     }
 
     if (leadIndexToDelete != null) {
@@ -689,17 +784,83 @@ fun StatusProfessionalCard() {
 }
 
 @Composable
-fun LeadPremiumCard(entry: String, onClick: () -> Unit, onDelete: () -> Unit) {
+fun LeadPremiumCard(entry: String, onClick: () -> Unit, onDelete: () -> Unit, onShare: () -> Unit) {
     val parts = entry.split(" | ")
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = OceanSurface), border = BorderStroke(1.dp, GlassWhite)) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(40.dp).background(TurquoiseNeon.copy(alpha = 0.1f), CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Person, null, tint = TurquoiseNeon, modifier = Modifier.size(20.dp)) }
+    val name = parts.getOrNull(0) ?: "Desconocido"
+    val time = parts.getOrNull(2) ?: ""
+    val type = parts.getOrNull(5) ?: "NORMAL"
+    val isVip = type == "VIP"
+
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = OceanSurface),
+        border = BorderStroke(1.dp, if (isVip) GoldPro.copy(alpha = 0.3f) else GlassWhite)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier.size(40.dp).background(if (isVip) GoldPro.copy(alpha = 0.1f) else TurquoiseNeon.copy(alpha = 0.1f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (isVip) Icons.Default.Stars else Icons.Default.Person, 
+                    null, 
+                    tint = if (isVip) GoldPro else TurquoiseNeon, 
+                    modifier = Modifier.size(20.dp)
+                )
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(parts.getOrNull(0) ?: "Desconocido", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                Text(parts.getOrNull(2) ?: "", color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    if (isVip) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Box(modifier = Modifier.background(GoldPro, RoundedCornerShape(4.dp)).padding(horizontal = 4.dp, vertical = 2.dp)) {
+                            Text("VIP", color = OceanDeep, fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
+                        }
+                    }
+                }
+                Text(time, color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp)
             }
-            IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, null, tint = Color.White.copy(alpha = 0.3f), modifier = Modifier.size(20.dp)) }
+            Row {
+                IconButton(onClick = onShare) {
+                    Icon(Icons.Default.Share, null, tint = TurquoiseNeon.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, null, tint = Color.White.copy(alpha = 0.3f), modifier = Modifier.size(18.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FilterSection(selected: String, onSelect: (String) -> Unit) {
+    val filters = listOf("TODOS", "HOY", "VIP")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        filters.forEach { filter ->
+            val isSelected = selected == filter
+            Surface(
+                modifier = Modifier.clickable { onSelect(filter) },
+                shape = RoundedCornerShape(20.dp),
+                color = if (isSelected) TurquoiseNeon else OceanSurface,
+                border = BorderStroke(1.dp, if (isSelected) TurquoiseNeon else GlassWhite)
+            ) {
+                Text(
+                    text = filter,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    color = if (isSelected) OceanDeep else Color.White.copy(alpha = 0.6f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -791,10 +952,9 @@ fun ActivityTerminal(logs: String, onTestClick: () -> Unit) {
 @Composable
 fun AssistantConfigPanel(
     keywords: String, onKeywordsChange: (String) -> Unit,
-    techNumber: String, onTechNumberChange: (String) -> Unit,
-    onPickTechNumber: () -> Unit,
     blacklist: String, onBlacklistChange: (String) -> Unit,
     promoLink: String, onPromoLinkChange: (String) -> Unit,
+    promoLinkVip: String, onPromoLinkVipChange: (String) -> Unit,
     repetitionDelay: Int, onRepetitionDelayChange: (Int) -> Unit,
     vipList: String, onVipListChange: (String) -> Unit,
     onPickContact: (Boolean) -> Unit,
@@ -804,6 +964,10 @@ fun AssistantConfigPanel(
     startMS: Int, endMS: Int, onOpenMS: () -> Unit,
     startS: Int, endS: Int, onOpenS: () -> Unit
 ) {
+    var showPreviewDay by rememberSaveable { mutableStateOf(false) }
+    var showPreviewNight by rememberSaveable { mutableStateOf(false) }
+    var showPreviewVip by rememberSaveable { mutableStateOf(false) }
+
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ConfigTextField(
             label = "PALABRAS CLAVE (separadas por comas)", 
@@ -815,24 +979,26 @@ fun AssistantConfigPanel(
             errorText = if (keywords.isBlank()) "Este campo no puede estar vacío" else null
         )
         ConfigTextField(
-            label = "TU NÚMERO DE TELÉFONO", 
-            value = techNumber, 
-            onValueChange = onTechNumberChange, 
-            description = "Número donde quieres que contacten.",
-            isError = techNumber.isBlank() || techNumber.length < 9,
-            errorText = when {
-                techNumber.isBlank() -> "El número es obligatorio"
-                techNumber.length < 9 -> "El número debe tener al menos 9 dígitos"
-                else -> null
-            },
-            trailingIcon = {
-                IconButton(onClick = onPickTechNumber) {
-                    Icon(Icons.Default.Add, null, tint = TurquoiseNeon)
-                }
-            }
+            label = "LISTA NEGRA", 
+            value = blacklist, 
+            onValueChange = onBlacklistChange, 
+            description = "Contactos a ignorar siempre.", 
+            animateIcon = blacklist.isEmpty(),
+            trailingIcon = { IconButton(onClick = { onPickContact(false) }) { Icon(Icons.Default.PersonAdd, null, tint = TurquoiseNeon) } }
         )
-        ConfigTextField(label = "LISTA NEGRA", value = blacklist, onValueChange = onBlacklistChange, description = "Contactos a ignorar siempre.", trailingIcon = { IconButton(onClick = { onPickContact(false) }) { Icon(Icons.Default.PersonAdd, null, tint = TurquoiseNeon) } })
-        ConfigTextField(label = "ENLACE / CATÁLOGO (Opcional)", value = promoLink, onValueChange = onPromoLinkChange, description = "Se pegará al final del mensaje.")
+        val urlRegex = "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(/.*)?$".toRegex()
+        val isPromoLinkValid = promoLink.isBlank() || urlRegex.matches(promoLink)
+        
+        ConfigTextField(
+            label = "ENLACE WEB, CATÁLOGO, REDES O FOTO (Opcional)", 
+            value = promoLink, 
+            onValueChange = { 
+                onPromoLinkChange(it.trim())
+            }, 
+            isError = !isPromoLinkValid,
+            errorText = if (!isPromoLinkValid) "Introduce una dirección web válida" else null,
+            description = "Pega aquí tu web, catálogo de WhatsApp, redes sociales o una foto de Google Drive. El asistente lo enviará al final del mensaje."
+        )
         var isVipExpanded by rememberSaveable { mutableStateOf(false) }
         Column(modifier = Modifier.fillMaxWidth().background(GoldPro.copy(alpha = 0.05f), RoundedCornerShape(16.dp)).border(1.dp, GoldPro.copy(alpha = 0.2f), RoundedCornerShape(16.dp)).clickable { isVipExpanded = !isVipExpanded }.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Stars, null, tint = GoldPro, modifier = Modifier.size(20.dp)); Spacer(modifier = Modifier.width(12.dp)); Text("CONTACTOS VIP (RESPUESTA TOTAL)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp, modifier = Modifier.weight(1f)); Icon(imageVector = if (isVipExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, contentDescription = null, tint = GoldPro.copy(alpha = 0.6f), modifier = Modifier.size(24.dp)) }
@@ -841,7 +1007,25 @@ fun AssistantConfigPanel(
                     Spacer(modifier = Modifier.height(12.dp)); 
                     Text("El asistente responderá a estas personas sin palabras clave (solo pantalla apagada).", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp, lineHeight = 14.sp); 
                     Spacer(modifier = Modifier.height(12.dp)); 
-                    ConfigTextField(label = "LISTA VIP", value = vipList, onValueChange = onVipListChange, trailingIcon = { IconButton(onClick = { onPickContact(true) }) { Icon(Icons.Default.Stars, null, tint = GoldPro) } }); 
+                    ConfigTextField(
+                        label = "LISTA VIP", 
+                        value = vipList, 
+                        onValueChange = onVipListChange, 
+                        animateIcon = vipList.isEmpty(),
+                        trailingIcon = { IconButton(onClick = { onPickContact(true) }) { Icon(Icons.Default.PersonAdd, null, tint = GoldPro) } }
+                    ); 
+                    val isPromoLinkVipValid = promoLinkVip.isBlank() || urlRegex.matches(promoLinkVip)
+
+                    ConfigTextField(
+                        label = "ENLACE EXCLUSIVO VIP (Web, Catálogo, Redes...)", 
+                        value = promoLinkVip, 
+                        onValueChange = {
+                            onPromoLinkVipChange(it.trim())
+                        }, 
+                        isError = !isPromoLinkVipValid,
+                        errorText = if (!isPromoLinkVipValid) "Dirección web no válida" else null,
+                        description = "Pega aquí un enlace especial (web, catálogo, redes sociales...) que solo verán tus contactos VIP."
+                    )
                     Spacer(modifier = Modifier.height(12.dp)); 
                     ConfigTextField(
                         label = "MENSAJE EXCLUSIVO PARA VIP", 
@@ -849,8 +1033,16 @@ fun AssistantConfigPanel(
                         onValueChange = onMsgVipChange, 
                         isMultiline = true,
                         isError = msgVip.isBlank(),
-                        errorText = if (msgVip.isBlank()) "Escribe un mensaje para tus VIP" else null
+                        errorText = if (msgVip.isBlank()) "Escribe un mensaje para tus VIP" else null,
+                        trailingIcon = {
+                            IconButton(onClick = { showPreviewVip = !showPreviewVip }) {
+                                Icon(imageVector = if (showPreviewVip) Icons.Default.VisibilityOff else Icons.Default.Visibility, contentDescription = null, tint = GoldPro)
+                            }
+                        }
                     ) 
+                    AnimatedVisibility(visible = showPreviewVip) {
+                        MessagePreview(template = msgVip, link = promoLinkVip)
+                    }
                 } 
             }
         }
@@ -869,25 +1061,34 @@ fun AssistantConfigPanel(
                     value = msgDay, 
                     onValueChange = onMsgDayChange, 
                     isMultiline = true,
-                    isError = msgDay.isBlank() || !msgDay.contains("{numero}"),
-                    errorText = when {
-                        msgDay.isBlank() -> "El mensaje no puede estar vacío"
-                        !msgDay.contains("{numero}") -> "Ojo: Falta poner {numero} para que el cliente vea tu teléfono"
-                        else -> null
+                    isError = msgDay.isBlank(),
+                    errorText = if (msgDay.isBlank()) "El mensaje no puede estar vacío" else null,
+                    trailingIcon = {
+                        IconButton(onClick = { showPreviewDay = !showPreviewDay }) {
+                            Icon(imageVector = if (showPreviewDay) Icons.Default.VisibilityOff else Icons.Default.Visibility, contentDescription = null, tint = TurquoiseNeon.copy(alpha = 0.5f))
+                        }
                     }
                 )
+                AnimatedVisibility(visible = showPreviewDay) {
+                    MessagePreview(template = msgDay, link = promoLink)
+                }
+
                 ConfigTextField(
                     label = "MENSAJE DE NOCHE", 
                     value = msgNight, 
                     onValueChange = onMsgNightChange, 
                     isMultiline = true,
-                    isError = msgNight.isBlank() || !msgNight.contains("{numero}"),
-                    errorText = when {
-                        msgNight.isBlank() -> "El mensaje no puede estar vacío"
-                        !msgNight.contains("{numero}") -> "Ojo: Falta poner {numero} para que el cliente vea tu teléfono"
-                        else -> null
+                    isError = msgNight.isBlank(),
+                    errorText = if (msgNight.isBlank()) "El mensaje no puede estar vacío" else null,
+                    trailingIcon = {
+                        IconButton(onClick = { showPreviewNight = !showPreviewNight }) {
+                            Icon(imageVector = if (showPreviewNight) Icons.Default.VisibilityOff else Icons.Default.Visibility, contentDescription = null, tint = TurquoiseNeon.copy(alpha = 0.5f))
+                        }
                     }
                 )
+                AnimatedVisibility(visible = showPreviewNight) {
+                    MessagePreview(template = msgNight, link = promoLink)
+                }
                 var isFreqExpanded by rememberSaveable { mutableStateOf(false) }
                 Column(modifier = Modifier.fillMaxWidth().background(TurquoiseNeon.copy(alpha = 0.05f), RoundedCornerShape(16.dp)).border(1.dp, TurquoiseNeon.copy(alpha = 0.1f), RoundedCornerShape(16.dp)).clickable { isFreqExpanded = !isFreqExpanded }.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Timer, null, tint = TurquoiseNeon, modifier = Modifier.size(20.dp)); Spacer(modifier = Modifier.width(12.dp)); Text("FRECUENCIA DE RESPUESTA", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp, modifier = Modifier.weight(1f)); Icon(imageVector = if (isFreqExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, contentDescription = null, tint = TurquoiseNeon.copy(alpha = 0.6f), modifier = Modifier.size(24.dp)) }
@@ -913,8 +1114,21 @@ fun ConfigTextField(
     description: String? = null, 
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
-    errorText: String? = null
+    errorText: String? = null,
+    helperText: String? = null,
+    animateIcon: Boolean = false
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "iconPulse")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+
     Column {
         Text(label, color = if (isError) Color(0xFFFF4B4B) else Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
         if (description != null) Text(description, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
@@ -933,10 +1147,47 @@ fun ConfigTextField(
             shape = RoundedCornerShape(16.dp), 
             minLines = if (isMultiline) 3 else 1, 
             maxLines = if (isMultiline) 5 else 1, 
-            trailingIcon = trailingIcon
+            trailingIcon = if (trailingIcon != null) {
+                {
+                    Box(modifier = if (animateIcon) Modifier.alpha(alpha) else Modifier) {
+                        trailingIcon()
+                    }
+                }
+            } else null
         )
         if (isError && errorText != null) {
             Text(text = errorText, color = Color(0xFFFF4B4B), fontSize = 10.sp, modifier = Modifier.padding(start = 8.dp, top = 4.dp))
+        } else if (helperText != null) {
+            Text(text = helperText, color = TurquoiseNeon.copy(alpha = 0.7f), fontSize = 10.sp, modifier = Modifier.padding(start = 8.dp, top = 4.dp))
+        }
+    }
+}
+
+@Composable
+fun MessagePreview(template: String, link: String = "") {
+    if (template.isNotBlank()) {
+        val fullMessage = if (link.isNotBlank()) "$template\n\n$link" else template
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .background(Color.Black.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                .padding(8.dp)
+        ) {
+            Text(
+                text = "VISTA PREVIA DEL MENSAJE:",
+                color = TurquoiseNeon,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = fullMessage,
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 11.sp,
+                lineHeight = 14.sp
+            )
         }
     }
 }
