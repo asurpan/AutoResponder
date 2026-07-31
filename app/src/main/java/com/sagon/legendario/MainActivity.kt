@@ -306,8 +306,7 @@ fun MainScreen(activity: MainActivity) {
     var hasContactsPerm by remember { mutableStateOf(context.checkSelfPermission(android.Manifest.permission.READ_CONTACTS) == android.content.pm.PackageManager.PERMISSION_GRANTED) }
     var isIgnoringBattery by remember { mutableStateOf(isIgnoringBatteryOptimizations(context)) }
     
-    var usageCount by remember { mutableIntStateOf(prefs.getInt("usage_count", 0)) }
-    var isPro by remember { mutableStateOf(prefs.getBoolean("is_pro_activated", false)) }
+    var isPro by remember { mutableStateOf(true) } // Siempre Pro en versión de pago
     var history by remember { mutableStateOf(prefs.getString("leads_history", "") ?: "") }
     var logs by remember { mutableStateOf(prefs.getString("activity_logs", "") ?: "") }
     var isAssistantEnabled by remember { mutableStateOf(prefs.getBoolean("service_enabled", false)) }
@@ -358,7 +357,7 @@ fun MainScreen(activity: MainActivity) {
     var showDisableDialog by remember { mutableStateOf(false) }
     var showMasterDialog by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
-    var showPaymentDialog by remember { mutableStateOf(false) }
+    var showDisclosureDialog by remember { mutableStateOf(!prefs.getBoolean("disclosure_accepted", false)) }
     var selectedLeadEntry by remember { mutableStateOf<String?>(null) }
     var leadIndexToDelete by remember { mutableStateOf<Int?>(null) }
 
@@ -427,16 +426,12 @@ fun MainScreen(activity: MainActivity) {
             contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp)
         ) {
             item {
-                LicenseWaterCard(
-                    count = usageCount, 
-                    isPro = isPro,
-                    onLongClick = { showMasterDialog = true },
-                    onActivateClick = { showPaymentDialog = true }
+                StatusProfessionalCard(
+                    onLongClick = { showMasterDialog = true }
                 )
             }
             
             item {
-                val isExhausted = !isPro && usageCount >= 30
                 AutomationCard(
                     isEnabled = isAssistantEnabled,
                     isSoundEnabled = isSoundEnabled,
@@ -448,18 +443,18 @@ fun MainScreen(activity: MainActivity) {
                         }
                     },
                     hasPerms = hasNotifPerm && isIgnoringBattery,
-                    isPro = isPro || usageCount < 30,
-                    isExhausted = isExhausted,
-                    onPayClick = { showPaymentDialog = true },
-                    pulseAlpha = pulseAlpha,
                     onToggle = { newValue -> 
                         if (!newValue) {
                             showDisableDialog = true
                         } else {
-                            isAssistantEnabled = true
-                            prefs.edit().putBoolean("service_enabled", true).apply()
-                            if (isSoundEnabled) {
-                                activity.playActivationSound()
+                            if (!prefs.getBoolean("disclosure_accepted", false)) {
+                                showDisclosureDialog = true
+                            } else {
+                                isAssistantEnabled = true
+                                prefs.edit().putBoolean("service_enabled", true).apply()
+                                if (isSoundEnabled) {
+                                    activity.playActivationSound()
+                                }
                             }
                         }
                     }
@@ -994,236 +989,101 @@ fun MainScreen(activity: MainActivity) {
         )
     }
 
-    if (showPaymentDialog) {
-        PaymentDialog(
-            androidId = androidId,
-            onDismiss = { showPaymentDialog = false },
-            onActivate = { code ->
-                if (verifyActivationCode(androidId, code)) {
-                    syncManager.setProStatus(true) // Actualiza Firebase y Local permanentemente
-                    syncManager.updateUsage(0)    // Resetea el contador en la nube
-                    isPro = true
-                    showPaymentDialog = false
-                    Toast.makeText(context, "¡LICENCIA PREMIUM ACTIVADA!", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(context, "Código Incorrecto", Toast.LENGTH_SHORT).show()
-                }
+    if (showDisclosureDialog) {
+        ProminentDisclosureDialog(
+            onDismiss = { showDisclosureDialog = false },
+            onAccept = {
+                prefs.edit().putBoolean("disclosure_accepted", true).apply()
+                showDisclosureDialog = false
             }
         )
     }
 }
 
-private fun verifyActivationCode(androidId: String, code: String): Boolean {
-    val cleanInput = code.trim().uppercase()
-    return cleanInput == generateActivationCode(androidId)
-}
-
-private fun generateActivationCode(androidId: String): String {
-    try {
-        val salt = "LORENSOFT_PRO_2026_SALT"
-        val input = androidId + salt
-        val digest = MessageDigest.getInstance("SHA-256")
-        val hash = digest.digest(input.toByteArray())
-        val hexHash = hash.joinToString("") { "%02x".format(it) }.uppercase()
-        
-        // Tomamos 9 caracteres para que encajen en grupos de 3
-        val base = hexHash.take(9)
-        val part1 = base.substring(0, 3)
-        val part2 = base.substring(3, 6)
-        val part3 = base.substring(6, 9)
-        
-        return "PRO-$part1-$part2-$part3"
-    } catch (e: Exception) {
-        return ""
-    }
-}
-
 @Composable
-fun PaymentDialog(androidId: String, onDismiss: () -> Unit, onActivate: (String) -> Unit) {
-    val context = LocalContext.current
-    var inputCode by remember { mutableStateOf("") }
-    
+fun ProminentDisclosureDialog(onDismiss: () -> Unit, onAccept: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = OceanSurface,
         shape = RoundedCornerShape(28.dp),
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Stars, null, tint = GoldPro)
+                Icon(Icons.Default.PrivacyTip, null, tint = TurquoiseNeon)
                 Spacer(modifier = Modifier.width(12.dp))
-                Text("Activar Premium", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Aviso de Privacidad", color = Color.White, fontWeight = FontWeight.Bold)
             }
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("1. Haz un pago de 3.99€ por Bizum o PayPal:", color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth().background(GlassWhite, RoundedCornerShape(12.dp)).padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("BIZUM", color = TurquoiseNeon, fontWeight = FontWeight.Bold, fontSize = 10.sp)
-                            Text("609 330 329", color = Color.White, fontSize = 14.sp)
-                        }
-                        IconButton(onClick = {
-                            val cb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            cb.setPrimaryClip(ClipData.newPlainText("Bizum", "609330329"))
-                            Toast.makeText(context, "Número copiado", Toast.LENGTH_SHORT).show()
-                        }) {
-                            Icon(Icons.Default.ContentCopy, null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(18.dp))
-                        }
-                    }
-                    
-                    Button(
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.paypal.me/appsaiber"))
-                            context.startActivity(intent)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF003087)),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(Icons.Default.AccountBalanceWallet, null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("PAGAR CON PAYPAL", fontWeight = FontWeight.Bold)
-                    }
-                }
-                
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("2. Envía captura a appsaiber@gmail.com con este ID:", color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
-                    Row(
-                        modifier = Modifier.fillMaxWidth().background(GlassWhite, RoundedCornerShape(12.dp)).padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(androidId, color = Color.White, modifier = Modifier.weight(1f), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
-                        IconButton(onClick = {
-                            val cb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            cb.setPrimaryClip(ClipData.newPlainText("DeviceID", androidId))
-                            Toast.makeText(context, "ID Copiado", Toast.LENGTH_SHORT).show()
-                        }) {
-                            Icon(Icons.Default.ContentCopy, null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(18.dp))
-                        }
-                    }
-                }
-                
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("3. Introduce el código recibido:", color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
-                    OutlinedTextField(
-                        value = inputCode,
-                        onValueChange = { inputCode = it.uppercase() },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Ej: A1B2C3D4", color = Color.White.copy(alpha = 0.2f)) },
-                        textStyle = LocalTextStyle.current.copy(color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center, fontWeight = FontWeight.Bold),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = TurquoiseNeon,
-                            unfocusedBorderColor = GlassWhite
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    "Para funcionar como asistente comercial, esta aplicación necesita acceder a tus notificaciones de WhatsApp.",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Text(
+                    "• Uso de Datos: Solo leemos el texto de los mensajes entrantes para detectar tus palabras clave y enviar la respuesta que hayas configurado.",
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 13.sp
+                )
+                Text(
+                    "• Privacidad Total: Tus conversaciones nunca salen de este dispositivo. No recopilamos, almacenamos ni compartimos ningún dato personal o mensaje con servidores externos.",
+                    color = MintElectric,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         },
         confirmButton = {
             Button(
-                onClick = { onActivate(inputCode) },
-                enabled = inputCode.length >= 4,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = TurquoiseNeon, contentColor = OceanDeep),
-                shape = RoundedCornerShape(12.dp)
+                onClick = onAccept,
+                colors = ButtonDefaults.buttonColors(containerColor = TurquoiseNeon, contentColor = OceanDeep)
             ) {
-                Text("ACTIVAR AHORA", fontWeight = FontWeight.Bold)
+                Text("ACEPTAR Y CONTINUAR")
             }
         }
     )
 }
 
 @Composable
-fun LicenseWaterCard(count: Int, isPro: Boolean, onLongClick: () -> Unit, onActivateClick: () -> Unit) {
-    val progress = if (isPro) 1f else (count / 30f).coerceIn(0f, 1f)
-    
+fun StatusProfessionalCard(onLongClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp)
+            .height(100.dp)
             .combinedClickable(
                 onClick = {},
                 onLongClick = onLongClick
             ),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = OceanSurface),
-        border = BorderStroke(1.dp, if (isPro) GoldPro.copy(alpha = 0.5f) else TurquoiseNeon.copy(alpha = 0.2f))
+        border = BorderStroke(1.dp, GoldPro.copy(alpha = 0.5f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Fondo de agua
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val wavePath = Path()
-                val width = size.width
-                val height = size.height
-                val waterLevel = height * (1f - progress)
-                
-                wavePath.moveTo(0f, height)
-                wavePath.lineTo(0f, waterLevel)
-                for (x in 0..width.toInt() step 10) {
-                    val y = waterLevel + (sin(x.toFloat() * 0.05f) * 5f)
-                    wavePath.lineTo(x.toFloat(), y)
-                }
-                wavePath.lineTo(width, height)
-                wavePath.close()
-                drawPath(path = wavePath, color = (if (isPro) GoldPro else TurquoiseNeon).copy(alpha = 0.15f))
-            }
-            
             Column(
                 modifier = Modifier.padding(20.dp).align(Alignment.CenterStart)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        if (isPro) Icons.Default.Verified else Icons.Default.DataUsage, 
+                        Icons.Default.Verified, 
                         null, 
-                        tint = if (isPro) GoldPro else TurquoiseNeon,
+                        tint = GoldPro,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = if (isPro) "LICENCIA PREMIUM" else "CRÉDITOS DE PRUEBA",
+                        text = "ASISTENTE PROFESIONAL",
                         color = Color.White,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 14.sp,
                         letterSpacing = 1.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = if (isPro) "Uso ilimitado activado" else "$count / 30 mensajes gratis",
-                    color = Color.White.copy(alpha = 0.7f),
+                    text = "Licencia Premium Activa • Privacidad Garantizada",
+                    color = MintElectric.copy(alpha = 0.8f),
                     fontSize = 12.sp
                 )
-                
-                if (!isPro) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                        color = TurquoiseNeon,
-                        trackColor = Color.White.copy(alpha = 0.1f)
-                    )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    Button(
-                        onClick = onActivateClick,
-                        modifier = Modifier.fillMaxWidth().height(36.dp),
-                        contentPadding = PaddingValues(0.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = TurquoiseNeon.copy(alpha = 0.1f), contentColor = TurquoiseNeon),
-                        border = BorderStroke(1.dp, TurquoiseNeon.copy(alpha = 0.3f)),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Icon(Icons.Default.Stars, null, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("ACTIVAR PREMIUM", fontWeight = FontWeight.Bold, fontSize = 11.sp)
-                    }
-                }
             }
         }
     }
@@ -1319,13 +1179,9 @@ fun AutomationCard(
     isSoundEnabled: Boolean,
     onSoundToggle: (Boolean) -> Unit,
     hasPerms: Boolean,
-    isPro: Boolean,
-    isExhausted: Boolean,
-    onPayClick: () -> Unit,
-    pulseAlpha: Float,
     onToggle: (Boolean) -> Unit
 ) {
-    val active = isEnabled && hasPerms && isPro
+    val active = isEnabled && hasPerms
     
     Card(
         modifier = Modifier.fillMaxWidth().shadow(if (active) 20.dp else 0.dp, RoundedCornerShape(24.dp), spotColor = TurquoiseNeon),
@@ -1338,9 +1194,6 @@ fun AutomationCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    if (active) {
-                        Box(modifier = Modifier.size(48.dp).alpha(pulseAlpha).background(TurquoiseNeon.copy(alpha = 0.2f), CircleShape))
-                    }
                     Icon(
                         imageVector = if (active) Icons.Default.AutoMode else Icons.Default.PauseCircle,
                         contentDescription = null,
@@ -1362,7 +1215,6 @@ fun AutomationCard(
                     Spacer(modifier = Modifier.height(4.dp))
                     
                     val statusText = when {
-                        isExhausted -> "⚠️ Prueba agotada. Activa Premium"
                         !hasPerms -> "Faltan permisos (Paso 1)"
                         active -> "Respondiendo a clientes..."
                         else -> "Activa el interruptor para empezar"
@@ -1371,7 +1223,7 @@ fun AutomationCard(
                     Text(
                         text = statusText,
                         fontSize = 12.sp,
-                        color = if (isExhausted) Color(0xFFFF4B4B) else Color.White.copy(alpha = 0.6f)
+                        color = Color.White.copy(alpha = 0.6f)
                     )
                 }
 
