@@ -173,7 +173,7 @@ class MainActivity : ComponentActivity() {
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
-                setSound(null, null) // Silenciar el canal de prueba para oír solo al robot
+                setSound(null, null) // Silenciar el canal de prueba para oír solo al asistente
                 enableVibration(false)
             }
             val notificationManager: NotificationManager =
@@ -187,10 +187,10 @@ class MainActivity : ComponentActivity() {
         val isEnabled = prefs.getBoolean("service_enabled", false)
         
         if (!isEnabled) {
-            Toast.makeText(context, "⚠️ ¡Activa primero el interruptor del robot!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "⚠️ ¡Activa primero el interruptor del asistente!", Toast.LENGTH_LONG).show()
         }
 
-        // Crear una acción de respuesta (RemoteInput) para que el robot la detecte
+        // Crear una acción de respuesta (RemoteInput) para que el asistente la detecte
         val remoteInput = RemoteInput.Builder("direct_reply")
             .setLabel("Responder...")
             .build()
@@ -220,7 +220,7 @@ class MainActivity : ComponentActivity() {
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(1, builder.build())
         
-        Toast.makeText(context, "Notificación enviada. ¡Verifica si el robot responde!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Notificación enviada. ¡Verifica si el asistente responde!", Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -310,7 +310,7 @@ fun MainScreen(activity: MainActivity) {
     var isPro by remember { mutableStateOf(prefs.getBoolean("is_pro_activated", false)) }
     var history by remember { mutableStateOf(prefs.getString("leads_history", "") ?: "") }
     var logs by remember { mutableStateOf(prefs.getString("activity_logs", "") ?: "") }
-    var isRobotEnabled by remember { mutableStateOf(prefs.getBoolean("service_enabled", false)) }
+    var isAssistantEnabled by remember { mutableStateOf(prefs.getBoolean("service_enabled", false)) }
     var isSoundEnabled by remember { mutableStateOf(prefs.getBoolean("sound_enabled", true)) }
 
     // --- NUEVOS ESTADOS DE CONFIGURACIÓN ---
@@ -390,7 +390,7 @@ fun MainScreen(activity: MainActivity) {
                 "activity_logs" -> logs = p.getString("activity_logs", "") ?: ""
                 "leads_history" -> history = p.getString("leads_history", "") ?: ""
                 "usage_count" -> usageCount = p.getInt("usage_count", usageCount)
-                "service_enabled" -> isRobotEnabled = p.getBoolean("service_enabled", false)
+                "service_enabled" -> isAssistantEnabled = p.getBoolean("service_enabled", false)
                 "is_pro_activated" -> isPro = p.getBoolean("is_pro_activated", false)
             }
         }
@@ -438,7 +438,7 @@ fun MainScreen(activity: MainActivity) {
             item {
                 val isExhausted = !isPro && usageCount >= 30
                 AutomationCard(
-                    isEnabled = isRobotEnabled,
+                    isEnabled = isAssistantEnabled,
                     isSoundEnabled = isSoundEnabled,
                     onSoundToggle = { 
                         isSoundEnabled = it
@@ -456,7 +456,7 @@ fun MainScreen(activity: MainActivity) {
                         if (!newValue) {
                             showDisableDialog = true
                         } else {
-                            isRobotEnabled = true
+                            isAssistantEnabled = true
                             prefs.edit().putBoolean("service_enabled", true).apply()
                             if (isSoundEnabled) {
                                 activity.playActivationSound()
@@ -915,19 +915,19 @@ fun MainScreen(activity: MainActivity) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.PowerSettingsNew, null, tint = Color(0xFFFF4B4B))
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text("Desactivar Robot", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Detener Asistente", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             text = {
                 Text(
-                    "Si detienes el robot, dejará de responder a tus clientes automáticamente.",
+                    "Si detienes el asistente, dejará de responder a tus clientes automáticamente.",
                     color = Color.White.copy(alpha = 0.7f)
                 )
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        isRobotEnabled = false
+                        isAssistantEnabled = false
                         prefs.edit().putBoolean("service_enabled", false).apply()
                         showDisableDialog = false
                     },
@@ -946,7 +946,7 @@ fun MainScreen(activity: MainActivity) {
     }
 
     if (showExitDialog) {
-        val isReady = allPermsOk && isAssistantComplete && isRobotEnabled
+        val isReady = allPermsOk && isAssistantComplete && isAssistantEnabled
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
             containerColor = OceanSurface,
@@ -965,15 +965,15 @@ fun MainScreen(activity: MainActivity) {
             text = {
                 Column {
                     Text(
-                        if (isReady) "¡Todo está configurado correctamente! El robot seguirá trabajando en segundo plano."
-                        else "Atención: Aún faltan pasos por completar. El robot podría no funcionar correctamente si sales ahora.",
+                        if (isReady) "¡Todo está configurado correctamente! El asistente seguirá trabajando en segundo plano."
+                        else "Atención: Aún faltan pasos por completar. El asistente podría no funcionar correctamente si sales ahora.",
                         color = Color.White.copy(alpha = 0.7f)
                     )
                     if (!isReady) {
                         Spacer(modifier = Modifier.height(12.dp))
                         if (!allPermsOk) Text("• Faltan permisos (Paso 1)", color = Color(0xFFFF4B4B), fontSize = 12.sp)
                         if (!isAssistantComplete) Text("• Configuración incompleta (Paso 2)", color = Color(0xFFFF4B4B), fontSize = 12.sp)
-                        if (!isRobotEnabled) Text("• Robot desactivado", color = Color(0xFFFF4B4B), fontSize = 12.sp)
+                        if (!isAssistantEnabled) Text("• Asistente desactivado", color = Color(0xFFFF4B4B), fontSize = 12.sp)
                     }
                 }
             },
@@ -1353,7 +1353,7 @@ fun AutomationCard(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (active) "ROBOT OPERATIVO" else "ROBOT DETENIDO",
+                        text = if (active) "ASISTENTE ACTIVO" else "ASISTENTE EN PAUSA",
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 16.sp,
                         letterSpacing = 1.sp,
@@ -1487,11 +1487,11 @@ fun NotificationInstructionCard(isVerified: Boolean, onVerifyChange: (Boolean) -
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Info, null, tint = TurquoiseNeon, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("IMPORTANTE: Cómo funciona el Robot", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text("IMPORTANTE: Cómo funciona el Asistente", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                "El robot responde leyendo el texto de tus NOTIFICACIONES. Por seguridad, nunca entra en tus chats privados. Para que funcione, sigue estos pasos:",
+                "El asistente responde leyendo el texto de tus NOTIFICACIONES. Por seguridad, nunca entra en tus chats privados. Para que funcione, sigue estos pasos:",
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 12.sp
             )
@@ -1634,7 +1634,7 @@ fun SectionTitle(
 fun ActivityTerminal(logs: String, onTestClick: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Esta pantalla te permite ver el 'cerebro' del robot trabajando en tiempo real. Aquí verás cuando detecta un mensaje, comprueba tus palabras clave y prepara la respuesta. Es la mejor forma de confirmar que todo está funcionando perfectamente.",
+            text = "Esta pantalla te permite ver el 'centro de procesamiento' del asistente trabajando en tiempo real. Aquí verás cuando detecta un mensaje, comprueba tus palabras clave y prepara la respuesta. Es la mejor forma de confirmar que todo está funcionando perfectamente.",
             color = Color.White.copy(alpha = 0.7f),
             fontSize = 11.sp,
             lineHeight = 16.sp,
@@ -1666,7 +1666,7 @@ fun ActivityTerminal(logs: String, onTestClick: () -> Unit) {
         ) {
             Icon(Icons.Default.PlayArrow, null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("PROBAR SI EL ROBOT ME LEE", fontWeight = FontWeight.Bold)
+            Text("PROBAR SI EL ASISTENTE ME LEE", fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -1704,7 +1704,7 @@ fun AssistantConfigPanel(
             value = keywords, 
             onValueChange = onKeywordsChange, 
             isMultiline = true,
-            description = "Escribe las palabras que detecta el robot para capturar al cliente automáticamente."
+            description = "Escribe las palabras que detecta el asistente para capturar al cliente automáticamente."
         )
         ConfigTextField(
             label = "TU NÚMERO DE TELÉFONO", 
@@ -1717,7 +1717,7 @@ fun AssistantConfigPanel(
             label = "LISTA NEGRA (Nombres o números a ignorar)", 
             value = blacklist, 
             onValueChange = onBlacklistChange,
-            description = "Contactos que el robot debe ignorar siempre. Separa por comas.",
+            description = "Contactos que el asistente debe ignorar siempre. Separa por comas.",
             trailingIcon = {
                 IconButton(onClick = { onPickContact(false) }) {
                     Icon(Icons.Default.PersonAdd, null, tint = TurquoiseNeon)
@@ -1768,7 +1768,7 @@ fun AssistantConfigPanel(
                 Column {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        "El robot responderá a estas personas aunque NO usen palabras clave, pero solo cuando tengas la PANTALLA APAGADA. Úsalo para familia o socios.", 
+                        "El asistente responderá a estas personas aunque NO usen palabras clave, pero solo cuando tengas la PANTALLA APAGADA. Úsalo para familia o socios.", 
                         color = Color.White.copy(alpha = 0.6f), 
                         fontSize = 11.sp, 
                         lineHeight = 14.sp
@@ -1794,7 +1794,7 @@ fun AssistantConfigPanel(
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Column {
                     Text("HORARIO COMERCIAL", color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
-                    Text("Define tu horario comercial para que el robot sepa cuándo enviar el mensaje de DÍA o el de NOCHE.", color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, modifier = Modifier.padding(start = 4.dp, bottom = 8.dp))
+                    Text("Define tu horario comercial para que el asistente sepa cuándo enviar el mensaje de DÍA o el de NOCHE.", color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, modifier = Modifier.padding(start = 4.dp, bottom = 8.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Card(
                             onClick = onOpenMS,
@@ -1860,7 +1860,7 @@ fun AssistantConfigPanel(
                         Column {
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                "¿Cuánto tiempo debe esperar el robot para volver a contestar a la misma persona?", 
+                                "¿Cuánto tiempo debe esperar el asistente para volver a contestar a la misma persona?", 
                                 color = Color.White.copy(alpha = 0.6f), 
                                 fontSize = 11.sp, 
                                 lineHeight = 14.sp
