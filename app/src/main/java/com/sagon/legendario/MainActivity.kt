@@ -92,11 +92,31 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.PickContact()
     ) { uri ->
         uri?.let { contactUri ->
-            val projection = arrayOf(android.provider.ContactsContract.Contacts.DISPLAY_NAME)
+            val projection = arrayOf(
+                android.provider.ContactsContract.Contacts._ID,
+                android.provider.ContactsContract.Contacts.DISPLAY_NAME
+            )
             contentResolver.query(contactUri, projection, null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
-                    val name = cursor.getString(0)
-                    onContactPickedCallback?.invoke(name)
+                    val id = cursor.getString(0)
+                    val name = cursor.getString(1)
+                    
+                    // Intentamos obtener el primer número de teléfono
+                    val phones = contentResolver.query(
+                        android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        arrayOf(android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER),
+                        android.provider.ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                        arrayOf(id),
+                        null
+                    )
+                    
+                    var pickedValue = name
+                    phones?.use { pCursor ->
+                        if (pCursor.moveToFirst()) {
+                            pickedValue = pCursor.getString(0)
+                        }
+                    }
+                    onContactPickedCallback?.invoke(pickedValue)
                 }
             }
         }
@@ -199,7 +219,7 @@ class MainActivity : ComponentActivity() {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Cliente de Prueba")
-            .setContentText("Hola, ¿cuánto cuesta el servicio?")
+            .setContentText("Hola, ¿cuánto cuesta arreglar una fuga?")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .addAction(action)
@@ -284,8 +304,8 @@ fun MainScreen(activity: MainActivity) {
     var repetitionDelay by remember { mutableIntStateOf(prefs.getInt("repetition_delay", 24)) }
     var vipList by remember { mutableStateOf(prefs.getString("vip_list", "") ?: "") }
     
-    val defaultDayMsg = "¡Buenas! Soy el técnico de mantenimiento. Ahora mismo estoy trabajando y no puedo atenderte bien por aquí. Escríbeme porfa a mi número personal {numero} y dime que quieres el DESCUENTO DEL MES. Así te paso un presupuesto rápido. ¡En cuanto pare un segundo te escribo!"
-    val defaultNightMsg = "¡Buenas! Soy el técnico de mantenimiento. Ya he terminado por hoy. Para dejarte el presupuesto listo para mañana a primera hora, escríbeme porfa a mi número personal {numero} mencionando el DESCUENTO DEL MES. ¡Mañana a primera hora te paso el precio con la oferta aplicada sin falta! ¡Gracias!"
+    val defaultDayMsg = "¡Buenas! Soy tu fontanero de confianza. Ahora mismo estoy trabajando y no puedo atenderte bien por aquí. Escríbeme porfa a mi número personal {numero} y dime que quieres el DESCUENTO DEL MES. Así te paso un presupuesto rápido. ¡En cuanto pare un segundo te escribo!"
+    val defaultNightMsg = "¡Buenas! Soy tu fontanero de confianza. Ya he terminado por hoy. Para dejarte el presupuesto listo para mañana a primera hora, escríbeme porfa a mi número personal {numero} mencionando el DESCUENTO DEL MES. ¡Mañana a primera hora te paso el precio con la oferta aplicada sin falta! ¡Gracias!"
     
     var msgDay by remember { mutableStateOf(prefs.getString("msg_day", defaultDayMsg) ?: defaultDayMsg) }
     var msgNight by remember { mutableStateOf(prefs.getString("msg_night", defaultNightMsg) ?: defaultNightMsg) }
@@ -417,6 +437,23 @@ fun MainScreen(activity: MainActivity) {
                         onKeywordsChange = { keywords = it; prefs.edit().putString("keywords", it).apply() },
                         techNumber = techNumber,
                         onTechNumberChange = { techNumber = it; prefs.edit().putString("tech_number", it).apply() },
+                        onPickTechNumber = {
+                            if (hasContactsPerm) {
+                                activity.pickContact { picked ->
+                                    // Limpiar el número de caracteres extra
+                                    val clean = picked.replace(Regex("[\\s\\-()]"), "")
+                                    var finalNum = clean
+                                    // Normalizar prefijo español si existe para dejar solo 9 cifras si es móvil
+                                    if (finalNum.startsWith("+34")) finalNum = finalNum.substring(3)
+                                    else if (finalNum.startsWith("34") && finalNum.length == 11) finalNum = finalNum.substring(2)
+                                    
+                                    techNumber = finalNum
+                                    prefs.edit().putString("tech_number", finalNum).apply()
+                                }
+                            } else {
+                                activity.requestContactsPermission()
+                            }
+                        },
                         blacklist = blacklist,
                         onBlacklistChange = { blacklist = it; prefs.edit().putString("blacklist", it).apply() },
                         promoLink = promoLink,
@@ -752,16 +789,70 @@ fun ActivityTerminal(logs: String, onTestClick: () -> Unit) {
 }
 
 @Composable
-fun AssistantConfigPanel(keywords: String, onKeywordsChange: (String) -> Unit, techNumber: String, onTechNumberChange: (String) -> Unit, blacklist: String, onBlacklistChange: (String) -> Unit, promoLink: String, onPromoLinkChange: (String) -> Unit, repetitionDelay: Int, onRepetitionDelayChange: (Int) -> Unit, vipList: String, onVipListChange: (String) -> Unit, onPickContact: (Boolean) -> Unit, msgDay: String, onMsgDayChange: (String) -> Unit, msgNight: String, onMsgNightChange: (String) -> Unit, msgVip: String, onMsgVipChange: (String) -> Unit, startMS: Int, endMS: Int, onOpenMS: () -> Unit, startS: Int, endS: Int, onOpenS: () -> Unit) {
+fun AssistantConfigPanel(
+    keywords: String, onKeywordsChange: (String) -> Unit,
+    techNumber: String, onTechNumberChange: (String) -> Unit,
+    onPickTechNumber: () -> Unit,
+    blacklist: String, onBlacklistChange: (String) -> Unit,
+    promoLink: String, onPromoLinkChange: (String) -> Unit,
+    repetitionDelay: Int, onRepetitionDelayChange: (Int) -> Unit,
+    vipList: String, onVipListChange: (String) -> Unit,
+    onPickContact: (Boolean) -> Unit,
+    msgDay: String, onMsgDayChange: (String) -> Unit,
+    msgNight: String, onMsgNightChange: (String) -> Unit,
+    msgVip: String, onMsgVipChange: (String) -> Unit,
+    startMS: Int, endMS: Int, onOpenMS: () -> Unit,
+    startS: Int, endS: Int, onOpenS: () -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ConfigTextField(label = "PALABRAS CLAVE (separadas por comas)", value = keywords, onValueChange = onKeywordsChange, isMultiline = true, description = "Escribe las palabras que detecta el asistente para capturar al cliente automáticamente.")
-        ConfigTextField(label = "TU NÚMERO DE TELÉFONO", value = techNumber, onValueChange = onTechNumberChange, description = "Número donde quieres que contacten.")
+        ConfigTextField(
+            label = "PALABRAS CLAVE (separadas por comas)", 
+            value = keywords, 
+            onValueChange = onKeywordsChange, 
+            isMultiline = true, 
+            description = "Escribe las palabras que detecta el asistente para capturar al cliente automáticamente.",
+            isError = keywords.isBlank(),
+            errorText = if (keywords.isBlank()) "Este campo no puede estar vacío" else null
+        )
+        ConfigTextField(
+            label = "TU NÚMERO DE TELÉFONO", 
+            value = techNumber, 
+            onValueChange = onTechNumberChange, 
+            description = "Número donde quieres que contacten.",
+            isError = techNumber.isBlank() || techNumber.length < 9,
+            errorText = when {
+                techNumber.isBlank() -> "El número es obligatorio"
+                techNumber.length < 9 -> "El número debe tener al menos 9 dígitos"
+                else -> null
+            },
+            trailingIcon = {
+                IconButton(onClick = onPickTechNumber) {
+                    Icon(Icons.Default.Add, null, tint = TurquoiseNeon)
+                }
+            }
+        )
         ConfigTextField(label = "LISTA NEGRA", value = blacklist, onValueChange = onBlacklistChange, description = "Contactos a ignorar siempre.", trailingIcon = { IconButton(onClick = { onPickContact(false) }) { Icon(Icons.Default.PersonAdd, null, tint = TurquoiseNeon) } })
         ConfigTextField(label = "ENLACE / CATÁLOGO (Opcional)", value = promoLink, onValueChange = onPromoLinkChange, description = "Se pegará al final del mensaje.")
         var isVipExpanded by rememberSaveable { mutableStateOf(false) }
         Column(modifier = Modifier.fillMaxWidth().background(GoldPro.copy(alpha = 0.05f), RoundedCornerShape(16.dp)).border(1.dp, GoldPro.copy(alpha = 0.2f), RoundedCornerShape(16.dp)).clickable { isVipExpanded = !isVipExpanded }.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Stars, null, tint = GoldPro, modifier = Modifier.size(20.dp)); Spacer(modifier = Modifier.width(12.dp)); Text("CONTACTOS VIP (RESPUESTA TOTAL)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp, modifier = Modifier.weight(1f)); Icon(imageVector = if (isVipExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, contentDescription = null, tint = GoldPro.copy(alpha = 0.6f), modifier = Modifier.size(24.dp)) }
-            AnimatedVisibility(visible = isVipExpanded) { Column { Spacer(modifier = Modifier.height(12.dp)); Text("El asistente responderá a estas personas sin palabras clave (solo pantalla apagada).", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp, lineHeight = 14.sp); Spacer(modifier = Modifier.height(12.dp)); ConfigTextField(label = "LISTA VIP", value = vipList, onValueChange = onVipListChange, trailingIcon = { IconButton(onClick = { onPickContact(true) }) { Icon(Icons.Default.Stars, null, tint = GoldPro) } }); Spacer(modifier = Modifier.height(12.dp)); ConfigTextField("MENSAJE EXCLUSIVO PARA VIP", msgVip, onMsgVipChange, isMultiline = true) } }
+            AnimatedVisibility(visible = isVipExpanded) { 
+                Column { 
+                    Spacer(modifier = Modifier.height(12.dp)); 
+                    Text("El asistente responderá a estas personas sin palabras clave (solo pantalla apagada).", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp, lineHeight = 14.sp); 
+                    Spacer(modifier = Modifier.height(12.dp)); 
+                    ConfigTextField(label = "LISTA VIP", value = vipList, onValueChange = onVipListChange, trailingIcon = { IconButton(onClick = { onPickContact(true) }) { Icon(Icons.Default.Stars, null, tint = GoldPro) } }); 
+                    Spacer(modifier = Modifier.height(12.dp)); 
+                    ConfigTextField(
+                        label = "MENSAJE EXCLUSIVO PARA VIP", 
+                        value = msgVip, 
+                        onValueChange = onMsgVipChange, 
+                        isMultiline = true,
+                        isError = msgVip.isBlank(),
+                        errorText = if (msgVip.isBlank()) "Escribe un mensaje para tus VIP" else null
+                    ) 
+                } 
+            }
         }
         AnimatedVisibility(visible = !isVipExpanded) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -773,8 +864,30 @@ fun AssistantConfigPanel(keywords: String, onKeywordsChange: (String) -> Unit, t
                         Card(onClick = onOpenS, modifier = Modifier.weight(1f), colors = CardDefaults.cardColors(containerColor = OceanSurface), border = BorderStroke(1.dp, GlassWhite)) { Column(modifier = Modifier.padding(12.dp)) { Text("DOMINGOS", color = TurquoiseNeon, fontSize = 10.sp, fontWeight = FontWeight.Bold); Text("${startS.toString().padStart(2, '0')}:00 - ${endS.toString().padStart(2, '0')}:00", color = Color.White, fontSize = 13.sp) } }
                     }
                 }
-                ConfigTextField("MENSAJE DE DÍA", msgDay, onMsgDayChange, isMultiline = true)
-                ConfigTextField("MENSAJE DE NOCHE", msgNight, onMsgNightChange, isMultiline = true)
+                ConfigTextField(
+                    label = "MENSAJE DE DÍA", 
+                    value = msgDay, 
+                    onValueChange = onMsgDayChange, 
+                    isMultiline = true,
+                    isError = msgDay.isBlank() || !msgDay.contains("{numero}"),
+                    errorText = when {
+                        msgDay.isBlank() -> "El mensaje no puede estar vacío"
+                        !msgDay.contains("{numero}") -> "Ojo: Falta poner {numero} para que el cliente vea tu teléfono"
+                        else -> null
+                    }
+                )
+                ConfigTextField(
+                    label = "MENSAJE DE NOCHE", 
+                    value = msgNight, 
+                    onValueChange = onMsgNightChange, 
+                    isMultiline = true,
+                    isError = msgNight.isBlank() || !msgNight.contains("{numero}"),
+                    errorText = when {
+                        msgNight.isBlank() -> "El mensaje no puede estar vacío"
+                        !msgNight.contains("{numero}") -> "Ojo: Falta poner {numero} para que el cliente vea tu teléfono"
+                        else -> null
+                    }
+                )
                 var isFreqExpanded by rememberSaveable { mutableStateOf(false) }
                 Column(modifier = Modifier.fillMaxWidth().background(TurquoiseNeon.copy(alpha = 0.05f), RoundedCornerShape(16.dp)).border(1.dp, TurquoiseNeon.copy(alpha = 0.1f), RoundedCornerShape(16.dp)).clickable { isFreqExpanded = !isFreqExpanded }.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Timer, null, tint = TurquoiseNeon, modifier = Modifier.size(20.dp)); Spacer(modifier = Modifier.width(12.dp)); Text("FRECUENCIA DE RESPUESTA", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp, modifier = Modifier.weight(1f)); Icon(imageVector = if (isFreqExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, contentDescription = null, tint = TurquoiseNeon.copy(alpha = 0.6f), modifier = Modifier.size(24.dp)) }
@@ -792,11 +905,39 @@ fun AssistantConfigPanel(keywords: String, onKeywordsChange: (String) -> Unit, t
 }
 
 @Composable
-fun ConfigTextField(label: String, value: String, onValueChange: (String) -> Unit, isMultiline: Boolean = false, description: String? = null, trailingIcon: @Composable (() -> Unit)? = null) {
+fun ConfigTextField(
+    label: String, 
+    value: String, 
+    onValueChange: (String) -> Unit, 
+    isMultiline: Boolean = false, 
+    description: String? = null, 
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    errorText: String? = null
+) {
     Column {
-        Text(label, color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+        Text(label, color = if (isError) Color(0xFFFF4B4B) else Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
         if (description != null) Text(description, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
-        OutlinedTextField(value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth(), textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 14.sp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = TurquoiseNeon, unfocusedBorderColor = GlassWhite, unfocusedLabelColor = Color.White.copy(alpha = 0.5f)), shape = RoundedCornerShape(16.dp), minLines = if (isMultiline) 3 else 1, maxLines = if (isMultiline) 5 else 1, trailingIcon = trailingIcon)
+        OutlinedTextField(
+            value = value, 
+            onValueChange = onValueChange, 
+            modifier = Modifier.fillMaxWidth(), 
+            isError = isError,
+            textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 14.sp), 
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = TurquoiseNeon, 
+                unfocusedBorderColor = GlassWhite, 
+                errorBorderColor = Color(0xFFFF4B4B),
+                unfocusedLabelColor = Color.White.copy(alpha = 0.5f)
+            ), 
+            shape = RoundedCornerShape(16.dp), 
+            minLines = if (isMultiline) 3 else 1, 
+            maxLines = if (isMultiline) 5 else 1, 
+            trailingIcon = trailingIcon
+        )
+        if (isError && errorText != null) {
+            Text(text = errorText, color = Color(0xFFFF4B4B), fontSize = 10.sp, modifier = Modifier.padding(start = 8.dp, top = 4.dp))
+        }
     }
 }
 
